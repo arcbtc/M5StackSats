@@ -34,7 +34,7 @@ const char* test_root_ca =   //SSL must be in this format, SSL for the node can 
 
 String choice = "";
 
-String on_currency = "BTCEUR";
+String on_currency = "BTCEUR"; //currency can be changed here ie BTCUSD BTCGBP etc
 String on_sub_currency = on_currency.substring(3);
 
 
