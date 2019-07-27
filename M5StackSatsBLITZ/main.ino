@@ -179,6 +179,7 @@ void loop() {
      M5.Lcd.println("COMPLETE");
 
      delay(2000);
+     page_input();
  
       }
       
