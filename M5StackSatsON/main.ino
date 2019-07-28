@@ -81,11 +81,12 @@ void get_keypad(){
 
        if(key != 0) {
         if(key >= 0x20 && key < 0x7F) { // ASCII String
+          if (isdigit((char)key)){
           key_val = ((char)key);
-          key_val = ((char)key);
-        } else {
-          key_val = ("0x%02X ",key);
-          key_val = ("0x%02X ",key);
+          }
+          else {
+          key_val = "";
+        } 
         }
       }
     }
