@@ -166,14 +166,15 @@ void loop() {
         tempi = 1;
 
      M5.Lcd.fillScreen(BLACK);
-     M5.Lcd.setCursor(50, 80);
+     M5.Lcd.setCursor(60, 80);
      M5.Lcd.setTextSize(4);
      M5.Lcd.setTextColor(TFT_GREEN);
      M5.Lcd.println("COMPLETE");
 
      delay(2000);
-
-      page_input();
+     M5.Lcd.fillScreen(BLACK);
+     M5.Lcd.setTextColor(TFT_WHITE);
+     page_input();
  
       }
       
