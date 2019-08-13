@@ -15,6 +15,8 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 //BLITZ DETAILS
 const char*  server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
+String blitzport = ":8077";
+
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
 const char* test_root_ca =   //SSL must be in this format, SSL for the node can be exported from yournode.com:8077 in firefox
@@ -276,7 +278,7 @@ void on_rates(){
   if (!client.connect("api.opennode.co", httpsPort)) {
     return;
   }
-  Serial.println("poo");
+
   String url = "/v1/rates";
   client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                "Host: api.opennode.co\r\n" +
@@ -318,8 +320,8 @@ void reqinvoice(String value){
     
    String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(random(1,1000)) +"\", \"expiry\": \"1000\"}";
   
-       client.print(String("POST ") + "https://room77.raspiblitz.com:8077/v1/invoices HTTP/1.1\r\n" +
-                 "Host: room77.raspiblitz.com:8077\r\n" +
+       client.print(String("POST ")+ "https://" + server + blitzport + "/v1/invoices HTTP/1.1\r\n" +
+                 "Host: "  + server + blitzport +"\r\n" +
                  "User-Agent: ESP322\r\n" +
                  "Grpc-Metadata-macaroon:" + invoicemacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
@@ -367,8 +369,8 @@ void gethash(String xxx){
   else {
     Serial.println("Connected to server!");
 
-       client.println(String("GET ") + "https://room77.raspiblitz.com:8077/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
-                 "Host: room77.raspiblitz.com:8077\r\n" +
+       client.println(String("GET ") + "https://" + server + blitzport + "/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
+                 "Host: "  + server + blitzport +"\r\n" +
                  "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
                  "Connection: close");
@@ -412,8 +414,8 @@ void checkpayment(String xxx){
   else {
     Serial.println("Connected to server!");
 
-       client.println(String("GET ") + "https://room77.raspiblitz.com:8077/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
-                 "Host: room77.raspiblitz.com:8077\r\n" +
+       client.println(String("GET ") + "https://" + server + blitzport + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
+                 "Host: "  + server + blitzport +"\r\n" +
                  "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
                  "Connection: close");
