@@ -15,7 +15,7 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 //BLITZ DETAILS
 const char*  server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
-String blitzport = ":8077";
+String blitzport = ":8080";
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
@@ -112,16 +112,15 @@ void setup() {
   M5.begin();
   M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)BLITZSplash_map);
   Wire.begin();
-  Serial.begin(115200);
+
 
   //connect to local wifi            
   WiFi.begin(wifiSSID, wifiPASS);   
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.println("connecting");
+
     delay(2000);
   }
   
-  Serial.println("connected");
 
     
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
@@ -144,8 +143,6 @@ void loop() {
      page_processing();
      
      reqinvoice(nosats);
-
-     Serial.println(hash);
 
      gethash(payreq);
 
@@ -192,11 +189,9 @@ void loop() {
      while ((bee < 120) && (tempi==0)){
 
       M5.update();
-     // get_keypad();
-     // Serial.println(key_val);
 
      if (M5.BtnA.wasReleased()) {
-    // if (key_val == "+"){
+
         tempi = -1;
      
      M5.Lcd.fillScreen(BLACK);
@@ -226,8 +221,7 @@ void loop() {
     }
 
      else if (M5.BtnA.wasReleased()) {
-    // else if (key_val == "+"){
-     
+
      M5.Lcd.fillScreen(BLACK);
      M5.Lcd.setCursor(0, 0);
      M5.Lcd.setTextColor(TFT_WHITE);
@@ -297,26 +291,24 @@ void on_rates(){
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, line);
     conversion = doc["data"][on_currency][on_currency.substring(3)]; 
-    Serial.println("poo");
 
-    Serial.println(conversion);
 }
 
 
 
 void reqinvoice(String value){
 
-  String memo = "Room77-";
+  String memo = "Memo-";
   
    WiFiClientSecure client;
 
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, 8077))
-    Serial.println("Connection failed!");
+  if (!client.connect(server, 8080))
+
   else {
-    Serial.println("Connected to server!");
+
     
    String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(random(1,1000)) +"\", \"expiry\": \"1000\"}";
   
@@ -333,13 +325,13 @@ void reqinvoice(String value){
     while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
-        Serial.println("headers received"); 
+       
         break;
       }
     }
     
     String content = client.readStringUntil('\n');
-    Serial.println(content);
+  
 
     client.stop();
     
@@ -365,9 +357,9 @@ void gethash(String xxx){
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, 8077))
-    Serial.println("Connection failed!");
+
   else {
-    Serial.println("Connected to server!");
+   
 
        client.println(String("GET ") + "https://" + server + blitzport + "/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
                  "Host: "  + server + blitzport +"\r\n" +
@@ -380,15 +372,13 @@ void gethash(String xxx){
     while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
-        Serial.println("headers received"); 
+       
         break;
       }
     }
     
 
     String content = client.readStringUntil('\n');
-    Serial.println(content);
-
 
     client.stop();
 
@@ -410,9 +400,8 @@ void checkpayment(String xxx){
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, 8077))
-    Serial.println("Connection failed!");
+
   else {
-    Serial.println("Connected to server!");
 
        client.println(String("GET ") + "https://" + server + blitzport + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
                  "Host: "  + server + blitzport +"\r\n" +
@@ -425,14 +414,13 @@ void checkpayment(String xxx){
     while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
-        Serial.println("headers received"); 
+
         break;
       }
     }
     
 
     String content = client.readStringUntil('\n');
-    Serial.println(content);
 
     client.stop();
     
