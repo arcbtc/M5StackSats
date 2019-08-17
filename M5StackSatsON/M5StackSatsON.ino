@@ -21,7 +21,7 @@ String hints = "false";
 
 String choice = "";
 
-String on_currency = "BTCUSD";  //currency can be changed here ie BTCEUR BTCGBP etc
+String on_currency = "BTCEUR";  //currency can be changed here ie BTCEUR BTCGBP etc
 String on_sub_currency = on_currency.substring(3);
 
 
@@ -106,18 +106,14 @@ void setup() {
   M5.begin();
   M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)ONSplash_map);
   Wire.begin();
-  Serial.begin(115200);
+ 
 
   //connect to local wifi            
   WiFi.begin(wifiSSID, wifiPASS);   
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.println("connecting");
     delay(2000);
   }
-  
-  Serial.println("connected");
 
-    
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
   
   on_rates();
@@ -182,11 +178,10 @@ void loop() {
      while ((bee < 120) && (tempi==0)){
 
       M5.update();
-     // get_keypad();
-     // Serial.println(key_val);
+
 
      if (M5.BtnA.wasReleased()) {
-    // if (key_val == "+"){
+
         tempi = -1;
      
      M5.Lcd.fillScreen(BLACK);
@@ -228,7 +223,7 @@ void loop() {
     }
     
     
-      Serial.print(key_val);
+
       inputs += key_val;
       
       temp = inputs.toInt();
@@ -276,7 +271,6 @@ void on_rates(){
   while (client.connected()) {
     String line = client.readStringUntil('\n');
     if (line == "\r") {
-  Serial.println("poo");
 
       break;
     }
@@ -286,9 +280,7 @@ void on_rates(){
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, line);
     conversion = doc["data"][on_currency][on_currency.substring(3)]; 
-    Serial.println("poo");
 
-    Serial.println(conversion);
 }
 
 
@@ -376,8 +368,7 @@ const size_t capacity = JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_
 
 String data_statuss = doc["data"]["status"]; 
 data_status = data_statuss;
-Serial.println(data_status);
-    
+
   
 }
 
