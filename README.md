@@ -9,6 +9,21 @@ There are two implementations of M5StackSats, one that communicates directly wit
 
 Converting the project to communicate with c-lightning nodes/other custodial services should be easy.
 
+# Installing arduino + libraries
+
+Install the Arduino IDE,<br>
+https://www.arduino.cc/en/Main/Software
+
+Install the ESP32 hardware,<br>
+https://github.com/espressif/arduino-esp32#installation-instructions
+
+From "Manage Libraries" install,<br>
+- LittlevGL
+- ArduinoJson
+- M5Stack
+
+![a](https://i.imgur.com/mCfnhZN.png)
+
 
 
 
