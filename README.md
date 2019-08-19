@@ -9,6 +9,14 @@ There are two implementations of M5StackSats, one that communicates directly wit
 
 Converting the project to communicate with c-lightning nodes/other custodial services should be easy.
 
+# M5StackSatsBLITZ
+
+[![bitcoinpos](https://i.imgur.com/0SV55GO.png)](https://www.youtube.com/watch?v=UJuCWnz2osE)
+
+# M5StackSatsON
+
+[![bitcoinpos](https://i.imgur.com/rNvyXhO.png)](https://www.youtube.com/watch?v=qUwff6IELck)
+
 # Installing arduino + libraries
 
 Install the Arduino IDE,<br>
