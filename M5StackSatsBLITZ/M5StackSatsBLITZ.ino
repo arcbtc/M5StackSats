@@ -38,7 +38,7 @@ String choice = "";
 
 String on_currency = "BTCEUR"; //currency can be changed here ie BTCUSD BTCGBP etc
 String on_sub_currency = on_currency.substring(3);
-
+String memo = "Memo "; //memo suffix, followed by the price then a random number
 
   String key_val;
   String cntr = "0";
@@ -298,7 +298,7 @@ void on_rates(){
 
 void reqinvoice(String value){
 
-  String memo = "Memo-";
+  
   
    WiFiClientSecure client;
 
@@ -310,7 +310,7 @@ void reqinvoice(String value){
   else {
 
     
-   String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(random(1,1000)) +"\", \"expiry\": \"1000\"}";
+   String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
   
        client.print(String("POST ")+ "https://" + server + blitzport + "/v1/invoices HTTP/1.1\r\n" +
                  "Host: "  + server + blitzport +"\r\n" +
