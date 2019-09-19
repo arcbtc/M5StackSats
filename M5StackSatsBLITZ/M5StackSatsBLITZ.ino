@@ -304,6 +304,7 @@ void nodedetails(){
   
   client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/getinfo HTTP/1.1\r\n" +
                "Host: "  + server +":"+ String(lndport) +"\r\n" +
+               "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                "User-Agent: ESP32\r\n" +
                "Content-Type: application/json\r\n" +
                "Connection: close\r\n\r\n");
@@ -318,6 +319,12 @@ void nodedetails(){
   } 
   String content = client.readStringUntil('\n');
   client.stop();
+  
+  const size_t capacity = 2*JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(13) + 520;
+  DynamicJsonDocument doc(capacity);
+
+  deserializeJson(content, json);
+  const char* identity_pubkey = doc["identity_pubkey"]; 
 }
 
 void nodecheck(){
@@ -328,6 +335,7 @@ void nodecheck(){
   
   client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/graph/node/"+ pubkey + "HTTP/1.1\r\n" +
                "Host: "  + server +":"+ String(lndport) +"\r\n" +
+               "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                "User-Agent: ESP32\r\n" +
                "Content-Type: application/json\r\n" +
                "Connection: close\r\n\r\n");
