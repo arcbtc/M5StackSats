@@ -360,7 +360,7 @@ void reqinvoice(String value){
   }
 
     
-   String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
+   String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" + String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
   
        client.print(String("POST ")+ "https://" + server + ":" + String(lndport) + "/v1/invoices HTTP/1.1\r\n" +
                  "Host: "  + server +":"+ String(lndport) +"\r\n" +
