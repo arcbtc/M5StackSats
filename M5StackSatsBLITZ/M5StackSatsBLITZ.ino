@@ -355,9 +355,9 @@ void reqinvoice(String value){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, lndport))
+  if (!client.connect(server, lndport)){
       return;   
-  else {
+  }
 
     
    String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
@@ -396,7 +396,7 @@ void reqinvoice(String value){
     payreq = payment_request;
  
 }
-}
+
 
 
 void gethash(String xxx){
@@ -406,9 +406,9 @@ void gethash(String xxx){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, lndport))
+  if (!client.connect(server, lndport)){
        return;
-  else {
+  }
    
 
        client.println(String("GET ") + "https://" + server +":"+ String(lndport) + "/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
@@ -440,7 +440,7 @@ void gethash(String xxx){
     const char* payment_hash = doc["payment_hash"]; 
     hash = payment_hash;
 }
-}
+
 
 void checkpayment(String xxx){
   
@@ -449,9 +449,9 @@ void checkpayment(String xxx){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, lndport))
+  if (!client.connect(server, lndport)){
        return;
-  else {
+  }
 
        client.println(String("GET ") + "https://" + server +":"+ String(lndport) + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
                  "Host: "  + server +":"+ String(lndport) +"\r\n" +
@@ -483,7 +483,7 @@ void checkpayment(String xxx){
     
   
 }
-}
+
 
 
 void page_qrdisplay(String xxx)
