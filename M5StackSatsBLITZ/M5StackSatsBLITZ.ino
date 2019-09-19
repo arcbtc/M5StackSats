@@ -306,7 +306,7 @@ void reqinvoice(String value){
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, 8080))
-
+      return;   
   else {
 
     
@@ -357,7 +357,7 @@ void gethash(String xxx){
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, 8077))
-
+       return;
   else {
    
 
@@ -400,7 +400,7 @@ void checkpayment(String xxx){
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, 8077))
-
+       return;
   else {
 
        client.println(String("GET ") + "https://" + server + blitzport + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
