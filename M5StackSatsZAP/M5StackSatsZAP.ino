@@ -20,7 +20,7 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 //BLITZ DETAILS
 const char*  server = "SOME-SUB-NAME.serveo.net"; //Using serveo to tunnel URL means no TLS cert is needed. In terminal run "ssh -R SOME-SUB-NAME.serveo.net:3010:localhost:8180 serveo.net"
 const int httpsPort = 443;
-const int lndport = 8080;
+const int lndport = 3010;
 String pubkey;
 String totcapacity;
 
@@ -103,7 +103,7 @@ void get_keypad(){
 
 void setup() {
   M5.begin();
-  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)BLITZSplash_map);
+  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)ZAPSplash_map);
   Wire.begin();
 
 
@@ -367,11 +367,15 @@ void reqinvoice(String value){
   if (!client.connect(server, lndport)){
       return;   
   }
-
-    
-   String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" + String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
   
-       client.print(String("POST ")+ "https://" + server + ":" + String(lndport) + "/v1/invoices HTTP/1.1\r\n" +
+   String topost = "{\"value\": \""+ value 
+                   +"\", \"memo\": \""+ memo + String(random(1,1000)) 
+                   +"\", \"expiry\": \"1000\","+
+                   +"\"private\": true}";
+
+  
+  Serial.println(topost);
+       client.print(String("POST ")+ "https://" + server +":"+ String(lndport) +"/v1/invoices HTTP/1.1\r\n" +
                  "Host: "  + server +":"+ String(lndport) +"\r\n" +
                  "User-Agent: ESP322\r\n" +
                  "Grpc-Metadata-macaroon:" + invoicemacaroon + "\r\n" +
@@ -381,6 +385,9 @@ void reqinvoice(String value){
                  "\r\n" + 
                  topost + "\n");
 
+
+     String line = client.readStringUntil('\n');
+    Serial.println(line);
     while (client.connected()) {
       String line = client.readStringUntil('\n');
       if (line == "\r") {
@@ -390,11 +397,11 @@ void reqinvoice(String value){
     }
     
     String content = client.readStringUntil('\n');
-  
+    Serial.println(content);
 
     client.stop();
     
-    const size_t capacity = JSON_OBJECT_SIZE(3) + 320;
+    const size_t capacity = JSON_OBJECT_SIZE(3) + 520;
     DynamicJsonDocument doc(capacity);
 
     deserializeJson(doc, content);
@@ -403,10 +410,9 @@ void reqinvoice(String value){
     hash = r_hash;
     const char* payment_request = doc["payment_request"]; 
     payreq = payment_request;
+    Serial.println(payreq);
  
 }
-
-
 
 void gethash(String xxx){
   
@@ -495,7 +501,7 @@ void page_qrdisplay(String xxx)
 {  
 
   M5.Lcd.fillScreen(BLACK); 
-  M5.Lcd.qrcode(payreq,45,0,240,10);
+  M5.Lcd.qrcode(payreq,45,0,240,14);
   delay(100);
 
 }
