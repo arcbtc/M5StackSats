@@ -16,6 +16,7 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 const char*  server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
 const int lndport = 3010;
+String pubkey;
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
@@ -292,6 +293,55 @@ void on_rates(){
     deserializeJson(doc, line);
     conversion = doc["data"][on_currency][on_currency.substring(3)]; 
 
+}
+
+
+void nodedetails(){
+  WiFiClientSecure client;
+  if (!client.connect(server, lndport)){
+    return;
+  }
+  
+  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/getinfo HTTP/1.1\r\n" +
+               "Host: "  + server +":"+ String(lndport) +"\r\n" +
+               "User-Agent: ESP32\r\n" +
+               "Content-Type: application/json\r\n" +
+               "Connection: close\r\n\r\n");
+                 
+  String line = client.readStringUntil('\n');
+    
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      break;
+    }
+  } 
+  String content = client.readStringUntil('\n');
+  client.stop();
+}
+
+void nodecheck(){
+  WiFiClientSecure client;
+  if (!client.connect(server, lndport)){
+    return;
+  }
+  
+  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/graph/node/"+ pubkey + "HTTP/1.1\r\n" +
+               "Host: "  + server +":"+ String(lndport) +"\r\n" +
+               "User-Agent: ESP32\r\n" +
+               "Content-Type: application/json\r\n" +
+               "Connection: close\r\n\r\n");
+                 
+  String line = client.readStringUntil('\n');
+    
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      break;
+    }
+  } 
+  String content = client.readStringUntil('\n');
+  client.stop();
 }
 
 
