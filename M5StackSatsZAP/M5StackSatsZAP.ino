@@ -1,10 +1,9 @@
 /**
  *  M5StackSatsZAP uses a non-fullnode, local Zap desktop wallet install and serveo.net (further details line 27)
  *  Macaroons will need to be converted to hex strings, in terminal run "xxd -plain readonly.macaroon > readmac.txt"...in Linux Zap's readonly.macaroon can be found in `$XDG_CONFIG_HOME/Zap/lnd/bitcoin/mainnet/wallet-1` (or under`~/.config`)
-
  */
 
-#include "BLITZSplash.c"
+#include "ZAPSplash.c"
 #include <M5Stack.h> 
 #include <string.h>
 #include <ArduinoJson.h>
