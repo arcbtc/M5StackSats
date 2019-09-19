@@ -323,7 +323,7 @@ void nodedetails(){
   const size_t capacity = 2*JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(13) + 520;
   DynamicJsonDocument doc(capacity);
 
-  deserializeJson(content, json);
+  deserializeJson(doc, content);
   const char* identity_pubkey = doc["identity_pubkey"]; 
 }
 
