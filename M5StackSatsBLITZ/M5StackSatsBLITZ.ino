@@ -17,6 +17,7 @@ const char*  server = "room77.raspiblitz.com";
 const int httpsPort = 443;
 const int lndport = 8080;
 String pubkey;
+String capacity;
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
@@ -318,6 +319,7 @@ void nodedetails(){
     }
   } 
   String content = client.readStringUntil('\n');
+  Serial.println(content);
   client.stop();
   
   const size_t capacity = 2*JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(13) + 520;
@@ -325,6 +327,7 @@ void nodedetails(){
 
   deserializeJson(doc, content);
   const char* identity_pubkey = doc["identity_pubkey"]; 
+  pubkey = identity_pubkey;
 }
 
 void nodecheck(){
@@ -333,7 +336,7 @@ void nodecheck(){
     return;
   }
   
-  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/graph/node/"+ pubkey + "HTTP/1.1\r\n" +
+  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/graph/node/"+ pubkey + " HTTP/1.1\r\n" +
                "Host: "  + server +":"+ String(lndport) +"\r\n" +
                "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                "User-Agent: ESP32\r\n" +
@@ -349,9 +352,18 @@ void nodecheck(){
     }
   } 
   String content = client.readStringUntil('\n');
+  Serial.println(content);
   client.stop();
-}
 
+  const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + 230;
+  DynamicJsonDocument doc(capacity);
+
+  deserializeJson(doc, content);
+
+  const char* total_capacity = doc["total_capacity"];
+  capacity = total_capacity;
+  
+}
 
 
 void reqinvoice(String value){
