@@ -15,7 +15,7 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 //BLITZ DETAILS
 const char*  server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
-const int lndport = 3010;
+const int lndport = 8080;
 String pubkey;
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
