@@ -17,7 +17,7 @@ const char*  server = "room77.raspiblitz.com";
 const int httpsPort = 443;
 const int lndport = 8080;
 String pubkey;
-String capacity;
+String totcapacity;
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
@@ -361,7 +361,7 @@ void nodecheck(){
   deserializeJson(doc, content);
 
   const char* total_capacity = doc["total_capacity"];
-  capacity = total_capacity;
+  totcapacity = total_capacity;
   
 }
 
