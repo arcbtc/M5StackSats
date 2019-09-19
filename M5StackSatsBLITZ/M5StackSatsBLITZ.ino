@@ -15,7 +15,7 @@ char wifiPASS[] = "YOUR-WIFI-PASSWORD";
 //BLITZ DETAILS
 const char*  server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
-const int blitzport = 3010;
+const int lndport = 3010;
 
 String readmacaroon = "YOUR-LND-READ-MACAROON";
 String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
@@ -305,15 +305,15 @@ void reqinvoice(String value){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, blitzport))
+  if (!client.connect(server, lndport))
       return;   
   else {
 
     
    String topost = "{\"value\": \""+ value +"\", \"memo\": \""+ memo + String(fiat) + on_sub_currency + " (" String(random(1,1000)) + ")" +"\", \"expiry\": \"1000\"}";
   
-       client.print(String("POST ")+ "https://" + server + ":" + String(blitzport) + "/v1/invoices HTTP/1.1\r\n" +
-                 "Host: "  + server +":"+ String(blitzport) +"\r\n" +
+       client.print(String("POST ")+ "https://" + server + ":" + String(lndport) + "/v1/invoices HTTP/1.1\r\n" +
+                 "Host: "  + server +":"+ String(lndport) +"\r\n" +
                  "User-Agent: ESP322\r\n" +
                  "Grpc-Metadata-macaroon:" + invoicemacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
@@ -356,13 +356,13 @@ void gethash(String xxx){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, blitzport))
+  if (!client.connect(server, lndport))
        return;
   else {
    
 
-       client.println(String("GET ") + "https://" + server +":"+ String(blitzport) + "/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
-                 "Host: "  + server +":"+ String(blitzport) +"\r\n" +
+       client.println(String("GET ") + "https://" + server +":"+ String(lndport) + "/v1/payreq/"+ xxx +" HTTP/1.1\r\n" +
+                 "Host: "  + server +":"+ String(lndport) +"\r\n" +
                  "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
                  "Connection: close");
@@ -399,12 +399,12 @@ void checkpayment(String xxx){
   client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
-  if (!client.connect(server, blitzport))
+  if (!client.connect(server, lndport))
        return;
   else {
 
-       client.println(String("GET ") + "https://" + server +":"+ String(blitzport) + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
-                 "Host: "  + server +":"+ String(blitzport) +"\r\n" +
+       client.println(String("GET ") + "https://" + server +":"+ String(lndport) + "/v1/invoice/"+ xxx +" HTTP/1.1\r\n" +
+                 "Host: "  + server +":"+ String(lndport) +"\r\n" +
                  "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
                  "Content-Type: application/json\r\n" +
                  "Connection: close");
