@@ -119,6 +119,7 @@ void setup() {
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
   
   on_rates();
+  nodecheck();
 }
 
 void loop() {
@@ -131,7 +132,6 @@ void loop() {
    get_keypad(); 
 
     if (M5.BtnC.wasReleased()) {
-   // if (key_val == "="){
 
      page_processing();
      
@@ -146,20 +146,14 @@ void loop() {
      settle = false;
 
      while (tempi == 0){
-      
-      
 
      checkpayment(hash);
-     
- 
-
      if (settle == false){
         counta ++;
         Serial.print(counta);
         if (counta == 100){
          tempi = 1;
         }
-      //  delay(300);
      }
       
        else{
@@ -171,10 +165,9 @@ void loop() {
      M5.Lcd.setTextColor(TFT_GREEN);
      M5.Lcd.println("COMPLETE");
 
-     delay(2000);
-     M5.Lcd.fillScreen(BLACK);
-     M5.Lcd.setTextColor(TFT_WHITE);
-     page_input();
+     delay(1000);
+     nodecheck();;
+     cntr = "2";
  
       }
       
@@ -193,9 +186,9 @@ void loop() {
      M5.Lcd.setTextColor(TFT_RED);
      M5.Lcd.println("CANCELLED");
 
-      delay(2000);
-
-     page_input();
+     delay(1000);
+     nodecheck();;
+     cntr = "2";
      
       }
       
@@ -288,74 +281,26 @@ void on_rates(){
 }
 // LND Requests
 
-void nodedetails(){
-  WiFiClientSecure client;
-  if (!client.connect(server, lndport)){
-    return;
-  }
-  
-  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/getinfo HTTP/1.1\r\n" +
-               "Host: "  + server +":"+ String(lndport) +"\r\n" +
-               "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
-               "User-Agent: ESP32\r\n" +
-               "Content-Type: application/json\r\n" +
-               "Connection: close\r\n\r\n");
-                 
-  String line = client.readStringUntil('\n');
-    
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    if (line == "\r") {
-      break;
-    }
-  } 
-  String content = client.readStringUntil('\n');
-  Serial.println(content);
-  client.stop();
-  
-  const size_t capacity = 2*JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(13) + 520;
-  DynamicJsonDocument doc(capacity);
-
-  deserializeJson(doc, content);
-  const char* identity_pubkey = doc["identity_pubkey"]; 
-  pubkey = identity_pubkey;
-}
-
 void nodecheck(){
+  bool checker = false;
+  while(!checker){
   WiFiClientSecure client;
+  
   if (!client.connect(server, lndport)){
-    return;
+
+    M5.Lcd.fillScreen(BLACK);
+     M5.Lcd.setCursor(20, 80);
+     M5.Lcd.setTextSize(3);
+     M5.Lcd.setTextColor(TFT_RED);
+     M5.Lcd.println("NO NODE DETECTED");
+     delay(1000);
+  }
+  else{
+    checker = true;
+  }
   }
   
-  client.print(String("GET ")+ "https://" + server +":"+ String(lndport) +"/v1/graph/node/"+ pubkey + " HTTP/1.1\r\n" +
-               "Host: "  + server +":"+ String(lndport) +"\r\n" +
-               "Grpc-Metadata-macaroon:" + readmacaroon + "\r\n" +
-               "User-Agent: ESP32\r\n" +
-               "Content-Type: application/json\r\n" +
-               "Connection: close\r\n\r\n");
-                 
-  String line = client.readStringUntil('\n');
-    
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    if (line == "\r") {
-      break;
-    }
-  } 
-  String content = client.readStringUntil('\n');
-  Serial.println(content);
-  client.stop();
-
-  const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(5) + 230;
-  DynamicJsonDocument doc(capacity);
-
-  deserializeJson(doc, content);
-
-  const char* total_capacity = doc["total_capacity"];
-  totcapacity = total_capacity;
-  
 }
-
 
 void reqinvoice(String value){
 
