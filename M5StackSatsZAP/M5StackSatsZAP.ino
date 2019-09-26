@@ -109,9 +109,17 @@ void setup() {
 
   //connect to local wifi            
   WiFi.begin(wifiSSID, wifiPASS);   
+  int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
-
-    delay(2000);
+    if(i >= 5){
+     M5.Lcd.fillScreen(BLACK);
+     M5.Lcd.setCursor(55, 80);
+     M5.Lcd.setTextSize(2);
+     M5.Lcd.setTextColor(TFT_RED);
+     M5.Lcd.println("WIFI NOT CONNECTED");
+    }
+    delay(1000);
+    i++;
   }
   
 
