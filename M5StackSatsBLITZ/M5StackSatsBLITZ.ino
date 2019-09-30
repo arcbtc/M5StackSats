@@ -306,7 +306,7 @@ void nodecheck(){
   bool checker = false;
   while(!checker){
   WiFiClientSecure client;
-  
+   client.setCACert(test_root_ca);
   if (!client.connect(server, lndport)){
 
     M5.Lcd.fillScreen(BLACK);
