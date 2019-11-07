@@ -24,6 +24,7 @@ String on_currency = "BTCGBP"; //currency can be changed here ie BTCUSD BTCGBP e
 String payid;
 int httpsPort = 443;
 
+
 String choice = "";
 String on_sub_currency = on_currency.substring(3);
 
@@ -97,7 +98,7 @@ void get_keypad(){
 
 void setup() {
   M5.begin();
-  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)ONSplash_map);
+  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)PAYWSplash_map);
   Wire.begin();
 
 
@@ -141,71 +142,29 @@ void loop() {
 
      page_qrdisplay(payreq);
 
-     int counta = 0;
-     int tempi = 0;
-     settle = false;
-
-     while (tempi == 0){
-
-     checkpayment();
-     if (settle == false){
-        counta ++;
-        Serial.print(counta);
-        if (counta == 100){
-         tempi = 1;
-        }
-     }
-      
-       else{
-        tempi = 1;
-
-     M5.Lcd.fillScreen(BLACK);
-     M5.Lcd.setCursor(60, 80);
-     M5.Lcd.setTextSize(4);
-     M5.Lcd.setTextColor(TFT_GREEN);
-     M5.Lcd.println("COMPLETE");
-
-     delay(1000);
-   
-     cntr = "2";
- 
-      }
-      
-     int bee = 0;
-     while ((bee < 120) && (tempi==0)){
-
-      M5.update();
-
-     if (M5.BtnA.wasReleased()) {
-
-        tempi = -1;
-     
-     M5.Lcd.fillScreen(BLACK);
-     M5.Lcd.setCursor(50, 80);
-     M5.Lcd.setTextSize(4);
-     M5.Lcd.setTextColor(TFT_RED);
-     M5.Lcd.println("CANCELLED");
-
-     delay(1000);
-   
-     cntr = "2";
-     
-      }
-      
-      delay(10);
-      bee++;
-     key_val = "";
-     inputs = "";
-     
-     }
-     
-      
-     }
+  ///////
+  checkpaid();
      
      key_val = "";
      inputs = "";
     }
 
+
+    
+     else if (M5.BtnB.wasReleased()) {
+
+      page_processing();
+    
+      nosats = "0";
+      reqinvoice(nosats);
+      page_qrdisplay(payreq);
+      checkpaid();
+      key_val = "";
+     inputs = "";
+       
+    }
+
+    
      else if (M5.BtnA.wasReleased()) {
 
      M5.Lcd.fillScreen(BLACK);
@@ -328,6 +287,71 @@ payreq = (String)payment_request;
 payid = (String)id;
 Serial.println(payreq);
 Serial.println(payid);
+}
+
+
+void checkpaid(){
+
+     int counta = 0;
+     int tempi = 0;
+     settle = false;
+
+     while (tempi == 0){
+
+     checkpayment();
+     if (settle == false){
+        counta ++;
+        Serial.print(counta);
+        if (counta == 100){
+         tempi = 1;
+        }
+     }
+      
+       else{
+        tempi = 1;
+
+     M5.Lcd.fillScreen(BLACK);
+     M5.Lcd.setCursor(60, 80);
+     M5.Lcd.setTextSize(4);
+     M5.Lcd.setTextColor(TFT_GREEN);
+     M5.Lcd.println("COMPLETE");
+
+     delay(1000);
+   
+     cntr = "2";
+ 
+      }
+      
+     int bee = 0;
+     while ((bee < 120) && (tempi==0)){
+
+      M5.update();
+
+     if (M5.BtnA.wasReleased()) {
+
+        tempi = -1;
+     
+     M5.Lcd.fillScreen(BLACK);
+     M5.Lcd.setCursor(50, 80);
+     M5.Lcd.setTextSize(4);
+     M5.Lcd.setTextColor(TFT_RED);
+     M5.Lcd.println("CANCELLED");
+
+     delay(1000);
+   
+     cntr = "2";
+     
+      }
+      
+      delay(10);
+      bee++;
+     key_val = "";
+     inputs = "";
+     
+     }
+     
+      
+     }
 }
 
 
