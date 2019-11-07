@@ -18,7 +18,7 @@ char wifiSSID[] = "YOUR-WIFI";
 char wifiPASS[] = "YOUR-PASS";
 const char* lntxbothost = "paywall.link";
 String invoicekey = "YOUR-PAYWALL-KEY"; 
-String invoicenum = "INVOICE-NUMBER" //Create a paywall, go to "Details" of the paywall https://paywall.link/dashboard/paywalls, number in the URL, ie 931 from https://paywall.link/link/view?id=931 
+String invoicenum = "INVOICE-NUMBER"; //Create a paywall, go to "Details" of the paywall https://paywall.link/dashboard/paywalls, number in the URL, ie 931 from https://paywall.link/link/view?id=931 
 String memo = "M5 "; //memo suffix, followed by the price then a random number
 String on_currency = "BTCGBP"; //currency can be changed here ie BTCUSD BTCGBP etc
 String payid;
