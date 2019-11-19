@@ -1,9 +1,4 @@
-/**
- *  M5StackSatsZAP uses a non-fullnode, local Zap desktop wallet install and serveo.net (further details line 27)
- *  Macaroons will need to be converted to hex strings, in terminal run "xxd -plain readonly.macaroon > readmac.txt"...in Linux Zap's readonly.macaroon can be found in `$XDG_CONFIG_HOME/Zap/lnd/bitcoin/mainnet/wallet-1` (or under`~/.config`)
- */
-
-#include "PAYWSplash.c"
+#include "LNTX.c"
 #include <M5Stack.h> 
 #include <string.h>
 #include <ArduinoJson.h>
@@ -15,7 +10,7 @@
 
 //Details to change
 //Wifi details
-char wifiSSID[] = "WIFI-NAME";
+char wifiSSID[] = "WIFI-USER";
 char wifiPASS[] = "WIFI-PASS";
 
 String pubkey;
@@ -26,8 +21,8 @@ bool certcheck = false;
 //LNTXBOT DETAILS
 int httpsPort = 443;
 //LNTXBOT details, from lntxbot use /api
-const char* lntxbothost = "YOURHOST";
-String invoicekey = "YOUR-INVOICE-KEY"; 
+const char* lntxbothost = "YOUR-LNTXBOT-HOST"; //Get from "/api" in telegram lntxbot, format like lntxbot.alhur.es
+String invoicekey = "YOUR-LNTXBOT-INVOICE-KEY"; 
 
 String choice;
 String payhash;
@@ -105,7 +100,7 @@ void get_keypad(){
 
 void setup() {
   M5.begin();
-  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)PAYWSplash_map);
+  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)LNTX_map);
   Wire.begin();
 
 
