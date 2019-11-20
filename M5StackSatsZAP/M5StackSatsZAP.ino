@@ -59,7 +59,7 @@ void page_input()
   M5.Lcd.setCursor(0, 40);
   M5.Lcd.println("Amount then C");
   M5.Lcd.println("");
-  M5.Lcd.println("EUR: ");
+  M5.Lcd.println(on_currency.substring(3) + ": ");
   M5.Lcd.println("");
   M5.Lcd.println("SATS: ");
   M5.Lcd.println("");
