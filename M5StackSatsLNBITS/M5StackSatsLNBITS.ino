@@ -18,9 +18,8 @@ String totcapacity;
 const char* payment_request;
 bool certcheck = false;
 
-//LNTXBOT DETAILS
+//LNBITS DETAILS
 int httpsPort = 443;
-//LNTXBOT details, from lntxbot use /api
 const char* lnbitshost = "YOUR-LNBITS-HOST";
 String invoicekey = "YOUR-LNBITS-WALLET-KEY"; 
 
