@@ -37,6 +37,9 @@ To create a splash image, you can use the
 Here you can find some more information on the
 [client server communication](https://arduino-esp8266.readthedocs.io/en/latest/esp8266wifi/client-examples.html).
 
+For parsing JSON responses and calculating the capacity you can use the
+[ArduinoJson Assistant](https://arduinojson.org/v6/assistant/) tool.
+
 ## Tip me
 
 If you like this project and might even use or extend it, why not
