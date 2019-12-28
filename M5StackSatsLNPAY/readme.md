@@ -1,4 +1,4 @@
-#LNPay M5StackSats
+# LNPay M5StackSats
 
 ### Step 1: WiFi Configuration
 
@@ -14,9 +14,9 @@ char wifiPASS[] = "<your_wifi_pass>";
 ```
 //API Setup
 String api_key = "<api_key_goes_here>"; // Can be found here: https://lnpay.co/dashboard/integrations
-String wallet_key = "<wallet_invoice_key_goes_here>"; // Can be found here: https://lnpay.co/dashboard/advanced-wallets
+String wallet_key = "<wi_XXXXX_key_goes_here>"; // Can be found here: https://lnpay.co/dashboard/advanced-wallets
 ```
-
+![screencast 2019-12-28 18-28-22](https://user-images.githubusercontent.com/3043754/71550506-38a40180-29a0-11ea-8f90-b68559591659.gif)
 
 
 ### Step 3: Payment / Invoice Details
