@@ -20,8 +20,8 @@ char wifiSSID[] = "<your_wifi_ssid>";
 char wifiPASS[] = "<your_wifi_pass>";
 
 //API Setup
-String api_key = "<api_key_goes_here>"; 
-String wallet_key = "<wallet_invoice_key_goes_here>"; 
+String api_key = "<api_key_goes_here>"; // Can be found here: https://lnpay.co/dashboard/integrations
+String wallet_key = "<wi_XXXXX_key_goes_here>"; // Can be found here: https://lnpay.co/dashboard/advanced-wallets
 
 //Payment Setup
 String memo = "M5 "; //memo suffix, followed by a random number
