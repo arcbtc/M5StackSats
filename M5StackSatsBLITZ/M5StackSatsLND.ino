@@ -19,22 +19,11 @@ const int lndport = 8080;
 String pubkey;
 String totcapacity;
 
-String readmacaroon = "YOUR-LND-READ-MACAROON";
-String invoicemacaroon = "YOUR-LND-INVOICE-MACAROON";
-const char* test_root_ca =   //SSL must be in this format, SSL for the node can be exported from yournode.com:8080 in firefox
-     "-----BEGIN CERTIFICATE-----\n" \
-    "MIICBTCCAaqgAwIBAgIQBSMZ9g3niBo1jyzK1DvECDAKBggqhkjOPQQDAjAyMR8w\n" \
-    "HQYDVQQKExZsbmQgYXV0b2dlbmVyYXRlZCBjZXJ0MQ8wDQYDVQQDEwZSb29tNzcw\n" \
-    "HhcNMTPBgNVHRMBAf8EBTADAQH/MHsGA1UdEQR0MHKCBMR8wHQYDVQQKExZsbmQg\n" \
-    "YXV0b2dlbmVyYXRlZCBjZXJ0MQ8wDQYDVQQDEwZSb29tNzcwWTATBgcqhkjOPQIB\n" \
-    "BggqhkjOPAAAAAAAAAAAAGHBMCoskqHEP6AAAAAAAAA+OWZzLshQoTUeV6FVKbFC\n" \
-    "CC+fVGRQsXJx+GVUknnNEcJTt/fQ9CmM6stqGPjAo4GhMIGeMA4GA1UdDwEB/wQE\n" \
-    "AwICpDAPBgNVHRMBAf8EBTADAQH/MHsGA1UdEQR0MHKCBlJvb203N4IJbG9jYWxo\n" \
-    "b3N0ghVyb29tNzcucmFzcGlibGl0ei5jb22CBHVuaXiCCnVuaXhwYWNrZXSHBH8A\n" \
-    "AAGHEAAAAAAAAAAAAAAAAAAAAAGHBMCoskqHEP6AAAAAAAAA+OWZZHfUV0qHBAAA\n" \
-    "AAAwCgYIKoZIzj0EAwIDSQAwRgIhALKz3oScii3i+5ltMVQc9u2O38rgfnGCj5Lh\n" \
-    "u9iwcAiZAiEA0BjRcisPUlG+SE/s+x6/A2NuT0gtIZ3PKd/GuM5T0jM=\n" \
-    "-----END CERTIFICATE-----\n";
+bool certcheck = false;
+String readmacaroon = "0201036c6e64028a01030a105dc5e03a7e5444d4ebbdbb513d1fc40f1201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a05706565727312047265616400000620b964213f708bc349dc1de651b424817651858fcfffa38345f6c566053ee22cf5";
+String invoicemacaroon = "0201036c6e640247030a105ec5e03a7e5444d4ebbdbb513d1fc40f1201301a160a0761646472657373120472656164120577726974651a170a08696e766f69636573120472656164120577726974650000062062630006bd8cc1f7ce6be81d90dd2c1b754ecf7d7d0d794fe2c36fec5680876e";
+//#include "TLSCert.h" //Un-comment if you need to include a TLS Cert, also uncomment line 279, 303, 360, 403
+
 
 String choice = "";
 
@@ -327,7 +316,7 @@ void reqinvoice(String value){
 
    WiFiClientSecure client;
 
-  client.setCACert(test_root_ca);
+ // client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, lndport)){
@@ -378,7 +367,7 @@ void gethash(String xxx){
   
    WiFiClientSecure client;
 
-  client.setCACert(test_root_ca);
+ // client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, lndport)){
@@ -421,7 +410,7 @@ void checkpayment(String xxx){
   
    WiFiClientSecure client;
 
-  client.setCACert(test_root_ca);
+ // client.setCACert(test_root_ca);
 
   Serial.println("\nStarting connection to server...");
   if (!client.connect(server, lndport)){
