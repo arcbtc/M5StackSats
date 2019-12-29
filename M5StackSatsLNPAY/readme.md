@@ -1,4 +1,6 @@
-# LNPay M5StackSats
+# M5StackSats [LNPay.co](https://lnpay.co) Edition
+
+### Step 0: Login / Create account on [LNPay.co](https://lnpay.co)
 
 ### Step 1: WiFi Configuration
 
