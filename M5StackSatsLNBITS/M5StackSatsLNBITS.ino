@@ -275,7 +275,7 @@ void reqinvoice(String value){
 
 
   Serial.println(line);
-  const size_t capacity = JSON_OBJECT_SIZE(2) + 430;
+  const size_t capacity = JSON_OBJECT_SIZE(2) + 800;
   DynamicJsonDocument doc(capacity);
 
   deserializeJson(doc, line);
@@ -368,7 +368,7 @@ void checkpayment(){
                 "Connection: close\r\n\r\n");
 
 
-  String line = client.readString();
+  String line = client.readStringUntil('\n');
   Serial.println(line);
 
   if (line == ""){
