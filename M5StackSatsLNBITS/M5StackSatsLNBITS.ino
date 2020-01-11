@@ -1,4 +1,4 @@
-#include "LNTX.c"
+#include "lnbits.c"
 #include <M5Stack.h> 
 #include <string.h>
 #include <ArduinoJson.h>
