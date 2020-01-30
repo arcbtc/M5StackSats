@@ -24,6 +24,8 @@ String description = "M5StackSats"; // Invoice description
 // --- Internal variables
 int keysdec;
 int keyssdec;
+int invoiceCheckFrequency = 5; // interval in seconds for invoice check
+int doneStateDuration = 3; // how long in seconds the complete/cancelled message is shown
 float temp;
 float satoshis;
 float conversion;
@@ -155,24 +157,23 @@ void loop() {
 
         if (invoiceStatus != "complete") {
           counta ++;
-          Serial.print(counta);
           if (counta == 50) {
             tempi = 1;
           }
-          delay(2500);
-        }
-
-        else {
+          delay(invoiceCheckFrequency * 1000);
+          check_payment(invoiceId);
+        } else {
           tempi = 1;
           settled = true;
 
           M5.Lcd.fillScreen(BLACK);
-          M5.Lcd.setCursor(60, 80);
+          M5.Lcd.setCursor(40, 80);
           M5.Lcd.setTextSize(4);
           M5.Lcd.setTextColor(TFT_GREEN);
-          M5.Lcd.println("COMPLETE");
+          M5.Lcd.println("THANKS! :)");
 
-          delay(2000);
+          delay(doneStateDuration * 1000);
+          
           M5.Lcd.fillScreen(BLACK);
           M5.Lcd.setTextColor(TFT_WHITE);
 
@@ -188,12 +189,12 @@ void loop() {
             tempi = -1;
 
             M5.Lcd.fillScreen(BLACK);
-            M5.Lcd.setCursor(50, 80);
+            M5.Lcd.setCursor(40, 80);
             M5.Lcd.setTextSize(4);
             M5.Lcd.setTextColor(TFT_RED);
-            M5.Lcd.println("CANCELLED");
+            M5.Lcd.println("CANCELLED :(");
 
-            delay(2000);
+            delay(doneStateDuration * 1000);
 
             get_exchange_rate();
             page_input();
