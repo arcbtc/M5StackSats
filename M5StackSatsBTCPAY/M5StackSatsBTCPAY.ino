@@ -153,8 +153,6 @@ void loop() {
       int tempi = 0;
 
       while (tempi == 0) {
-        check_payment(invoiceId);
-
         if (invoiceStatus != "complete") {
           counta ++;
           if (counta == 50) {
@@ -248,16 +246,23 @@ void loop() {
 
 String get_request_body(WiFiClientSecure &client)
 {
+  // skip headers
   while (client.connected() || client.available()) {
     if (client.available() && client.readStringUntil('\n') == "\r") break;
   }
-  
+
+  // find body – this is still brittle!
   String reqBody = "";
   while (client.connected() || client.available()) {
     if (client.available()) {
       String ln = client.readStringUntil('\n');
-      if (ln.indexOf("{") >= 0 || ln.indexOf("}") >= 0) reqBody += ln;
-      else if (ln == "\r") break;
+      Serial.println("---: " + ln);
+      if (ln.indexOf("{") >= 0 || ln.indexOf("}") >= 0) {
+        reqBody += ln;
+        break;
+      } else if (ln == "\r") {
+        break;
+      }
     }
   }
 
@@ -272,17 +277,21 @@ void get_exchange_rate()
   if (!client.connect(server, httpsPort)) return;
 
   // Send HTTP request
-  client.print(String("GET ") + "/rates?currencyPairs=" + currencyPair + " HTTP/1.1\r\n" +
+  String reqStr = String("GET ") + "/rates?currencyPairs=" + currencyPair;
+  client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
                "Content-Type: application/json\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n\r\n");
+  Serial.println("REQ: " + reqStr);
 
   // Get and parse JSON body
   String json = get_request_body(client);
   client.stop();
+  Serial.println("RES: " + json);
+  
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(5) + 80;
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
@@ -297,8 +306,8 @@ void generate_invoice(String value)
   if (!client.connect(server, httpsPort)) return;
 
   String payload = "{\"price\":\"" + value + "\",\"currency\":\"" + currency  + "\",\"itemDesc\":\"" + description  + "\"}";
-
-  client.print(String("POST ") + "/invoices/ HTTP/1.1\r\n" +
+  String reqStr = String("POST ") + "/invoices/";
+  client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
                "Content-Type: application/json\r\n" +
@@ -308,11 +317,14 @@ void generate_invoice(String value)
                "Content-Length: " + payload.length() + "\r\n" +
                "\r\n" +
                payload + "\n");
+  Serial.println("REQ: " + reqStr + " " + payload);
   
   // Get and parse JSON body
   String json = get_request_body(client);
   client.stop();
-  const size_t capacity = 2*JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 9*JSON_OBJECT_SIZE(1) + 6*JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37) + 3140;
+  Serial.println("RES: " + json);
+  
+  const size_t capacity = 2*JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 9*JSON_OBJECT_SIZE(1) + 6*JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37) + 3400;
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
 
@@ -328,9 +340,9 @@ void generate_invoice(String value)
   invoicePayReq = _invoicePayReq;
   conversion = data["rate"];
 
-  Serial.println("URL: " + _invoiceUrl);
-  Serial.println("ID: " + invoiceId);
-  Serial.println("Status: " + invoiceStatus);
+  Serial.println("Invoice URL: " + _invoiceUrl);
+  Serial.println("Invoice ID: " + invoiceId);
+  Serial.println("Invoice Status: " + invoiceStatus);
   Serial.println("Payment Request: " + invoicePayReq);
 }
 
@@ -339,17 +351,21 @@ void check_payment(String invId)
   WiFiClientSecure client;
   if (!client.connect(server, httpsPort)) return;
 
-  client.print(String("GET ") + "/invoices/" + invId + " HTTP/1.1\r\n" +
+  String reqStr = String("GET ") + "/invoices/" + invId;
+  client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
                "Content-Type: application/json\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n\r\n");
+  Serial.println("REQ: " + reqStr);
 
   // Get and parse JSON body
   String json = get_request_body(client);
   client.stop();
+  Serial.println("RES: " + json);
+  
   const size_t capacity = 2*JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 10*JSON_OBJECT_SIZE(1) + 5*JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37);
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
@@ -360,5 +376,5 @@ void check_payment(String invId)
   
   invoiceStatus = _invoiceStatus;
   
-  Serial.println("Status: " + invoiceStatus);
+  Serial.println("Invoice status: " + invoiceStatus);
 }
