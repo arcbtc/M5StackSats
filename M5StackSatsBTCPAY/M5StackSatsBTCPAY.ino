@@ -46,18 +46,22 @@ void page_input()
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(0, 40);
-  M5.Lcd.println("Amount then C");
+  M5.Lcd.setCursor(65, 20);
+  M5.Lcd.println("Enter the amount");
   M5.Lcd.setTextSize(3);
-  M5.Lcd.println("");
+  M5.Lcd.setCursor(20, 70);
   M5.Lcd.println(currencyFiat + ": ");
+  M5.Lcd.setCursor(20, 100);
   M5.Lcd.println("Sats: ");
   M5.Lcd.println("");
   M5.Lcd.setTextSize(2);
+  M5.Lcd.setCursor(48, 160);
   M5.Lcd.println("Rate: " + String(conversion));
   M5.Lcd.println("");
-  M5.Lcd.setCursor(50, 200);
-  M5.Lcd.println("TO RESET PRESS A");
+  M5.Lcd.setCursor(37, 220);
+  M5.Lcd.println("Reset");
+  M5.Lcd.setCursor(214, 220);
+  M5.Lcd.println("Proceed");
 }
 
 void page_processing()
@@ -228,10 +232,10 @@ void loop() {
     sats = String(intsats);
     M5.Lcd.setTextSize(3);
     M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
-    M5.Lcd.setCursor(100, 80);
+    M5.Lcd.setCursor(120, 70);
     M5.Lcd.println(fiat);
     M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
-    M5.Lcd.setCursor(100, 104);
+    M5.Lcd.setCursor(120, 100);
     M5.Lcd.println(sats);
 
     delay(100);
