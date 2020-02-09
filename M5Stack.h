@@ -1,3 +1,6 @@
+#include <M5Stack.h> 
+#define KEYBOARD_I2C_ADDR     0X08
+#define KEYBOARD_INT          5
 
 void screen_input_sats(String fiat, String nosats)
 {
