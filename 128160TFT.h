@@ -13,6 +13,10 @@ tft.setCursor(87, 136);
 tft.println(nosats);
 }
 
+void screen_splash(){
+tft.drawBitmap(0, 0, 320, 240, (uint8_t *)splash_map);
+}
+
 void screen_page_qrdisplay(String xxx)
 {  
 tft.fillScreen(BLACK); 
