@@ -1,6 +1,5 @@
 
 #include "LNPAYSplash.c"
-#include <M5Stack.h> 
 #include <string.h>
 #include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
@@ -9,8 +8,7 @@
 #include <HTTPClient.h>
 
 
-#define KEYBOARD_I2C_ADDR     0X08
-#define KEYBOARD_INT          5
+
 
 //WIFI Setup
 char wifiSSID[] = "<your_wifi_ssid>";
@@ -50,7 +48,7 @@ String payreq = "";
 
 void setup() {
   M5.begin();
-  M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)PAYWSplash_map);
+  screen_splash();
   Wire.begin();
 
   //connect to local wifi            
