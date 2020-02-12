@@ -9,7 +9,7 @@ String key_val;
 
 void screen_splash()
 {  
-M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)Splash_map);
+M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)SplashM5_map);
 }
 
 void screen_input_sats(String fiat, int nosats)
