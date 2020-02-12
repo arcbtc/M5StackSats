@@ -5,19 +5,32 @@
 #include "PaymentConnector.h"
 #include "LNimg.h"
 
-PaymentConnector paymentConnector("BTCUSD");
+////BEGINNING OF USER SETUP/////
 
-//Payment Setup 
+//HARDWARE Uncomment for hardware used//
+#define M5STACK //Based on M5Stack Faces Kit
+//#define DIY //Based on ESP32/1.8TFT/Keypad Matrix
+
+//WIFI Setup//
+char wifiSSID[] = "raspiblitz";
+char wifiPASS[] = "raspiblitz";
+
+//Payment Setup//
 String memo = "PoS "; //memo suffix, followed by a random number
 String on_currency = "BTCUSD"; //currency can be changed here ie BTCUSD BTCGBP etc
 
-//Declare whether you're using the DIY or M5stackSats flavour
-#include "M5Stack.h"
+////END OF USER SETUP///
 
-//WIFI Setup
-char wifiSSID[] = "raspiblitz";
-char wifiPASS[] = "raspiblitz";
-  
+PaymentConnector paymentConnector("BTCUSD");
+
+#ifdef DIY
+  #include "DIYv.h"
+#endif
+
+#ifdef M5STACK
+  #include "M5Stack.h"
+#endif
+
 //Variables
 String inputs = "";
 String fiat;
@@ -26,14 +39,22 @@ int nosats;
 float temp; 
 float conversion;
 int settled;
+bool cntr = false;
 
 void setup() {
+  
+  #ifdef M5STACK
+   M5.begin();
+   pinMode(KEYBOARD_INT, INPUT_PULLUP);
+   Wire.begin();
+  #endif
 
- //M5-centric
- M5.begin();
- Wire.begin();
- pinMode(KEYBOARD_INT, INPUT_PULLUP);
- 
+  #ifdef DIY
+   tft.begin();
+   tft.fillScreen(TFT_BLACK);
+   tft.setRotation(3);
+  #endif
+  
  screen_splash();
  Serial.begin(115200);
  
@@ -53,15 +74,21 @@ void setup() {
 }
 
 void loop() {
-
   screen_page_input();
-
   bool cntr = false;
+
   while (cntr == false){
     
     get_keypad(); 
 
-    if (M5.BtnC.wasReleased()) {
+  #ifdef M5STACK
+   if (M5.BtnC.wasReleased()) {
+  #endif
+  
+  #ifdef DIY
+   if (key_val == "#") {
+  #endif
+      
       
       screen_page_processing();
       
@@ -75,23 +102,15 @@ void loop() {
       key_val = "";
       inputs = "";
       
-    } else if (M5.BtnB.wasReleased()) {
+    } 
       
-      screen_page_processing();
-      
-      nosats = 0;
-      
-      createInvoiceResponse resp = paymentConnector.createInvoice(nosats,memo);
-      
-      screen_qrdisplay(resp.payment_request);
-      
-      settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
-      checkpaid(resp);
-      
-      key_val = "";
-      inputs = "";
-      
-    } else if (M5.BtnA.wasReleased()) {
+  #ifdef M5STACK
+   else if (M5.BtnA.wasReleased()) {
+  #endif
+  
+  #ifdef DIY
+   else if (key_val == "*") {
+  #endif
       
       screen_refresh();
       
@@ -145,23 +164,38 @@ void on_rates(){
 void checkpaid(createInvoiceResponse resp){
      int counta = 0;
      bool tempi = false;
+     
      while (tempi == false){
        settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
        if (settled == 0){
           counta ++;
-          if (counta == 100) {   
+          if (counta == 100) {
+            
            tempi = true;
+           cntr = true;
           }
        } else {
         screen_complete();
         tempi = true;
+        cntr = true;
         delay(1000);
       }
      int bee = 0;
      while ((bee < 120) && (tempi==0)) {
-        M5.update();
-        if (M5.BtnA.wasReleased()) {
+      
+         get_keypad(); 
+         
+          #ifdef M5STACK
+           if (M5.BtnA.wasReleased()) {
+          #endif
+          
+          #ifdef DIY
+           if (key_val == "*") {
+          #endif
+
+      
           tempi = true;
+          cntr = true;
           screen_cancel();
           delay(1000);
           
