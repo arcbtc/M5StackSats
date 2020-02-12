@@ -19,9 +19,10 @@ char wifiPASS[] = "raspiblitz";
 String memo = "PoS "; //memo suffix, followed by a random number
 String on_currency = "BTCUSD"; //currency can be changed here ie BTCUSD BTCGBP etc
 
-////END OF USER SETUP///
-
+//Currency selection
 PaymentConnector paymentConnector("BTCUSD");
+
+////END OF USER SETUP///
 
 #ifdef DIY
   #include "DIYv.h"
