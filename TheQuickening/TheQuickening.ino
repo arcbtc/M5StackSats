@@ -53,9 +53,10 @@ void setup() {
 }
 
 void loop() {
-  screen_page_input();
-  bool cntr = false;
 
+  screen_page_input();
+
+  bool cntr = false;
   while (cntr == false){
     
     get_keypad(); 
@@ -144,20 +145,16 @@ void on_rates(){
 void checkpaid(createInvoiceResponse resp){
      int counta = 0;
      bool tempi = false;
-     
      while (tempi == false){
        settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
        if (settled == 0){
           counta ++;
-          if (counta == 100) {
-            
+          if (counta == 100) {   
            tempi = true;
-           cntr = true;
           }
        } else {
         screen_complete();
         tempi = true;
-        cntr = true;
         delay(1000);
       }
      int bee = 0;
@@ -165,7 +162,6 @@ void checkpaid(createInvoiceResponse resp){
         M5.update();
         if (M5.BtnA.wasReleased()) {
           tempi = true;
-          cntr = true;
           screen_cancel();
           delay(1000);
           
