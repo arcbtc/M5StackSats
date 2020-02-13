@@ -2,10 +2,14 @@
 #include <HTTPClient.h>
 #include <string.h>
 #include <ArduinoJson.h>
-#include "PaymentConnector.h"
 #include "LNimg.h"
 
-PaymentConnector paymentConnector("BTCUSD");
+#include "PaymentInvoice.h"
+#include "PaymentServer.h"
+#include "PaymentServerLNPay.h"
+#include "PaymentServerLND.h"
+
+String PAYMENTSERVER = "LND"; 
 
 //Payment Setup 
 String memo = "PoS "; //memo suffix, followed by a random number
@@ -25,7 +29,9 @@ float satoshis;
 int nosats;
 float temp; 
 float conversion;
-int settled;
+bool settled;
+
+PaymentServer *paymentserver;
 
 void setup() {
 
@@ -36,7 +42,29 @@ void setup() {
  
  screen_splash();
  Serial.begin(115200);
+
+ if (PAYMENTSERVER=="LNPAY")
+ {
+   Serial.println((String)"Setting LND as Payment Server");
+   PaymentServerLND * lnd = new PaymentServerLND();
+   paymentserver = lnd;
+ } else
+ {
+   Serial.println((String)"Setting LNPay as Payment PaymentServer");
+   PaymentServerLNPay * lnpay = new PaymentServerLNPay();
+   paymentserver = lnpay;
+ }
  
+ Serial.print((String)"Running as PaymentServer --> ");
+ Serial.println(paymentserver->getServiceName());
+
+ Serial.println((String)"Init PaymentServer Data ...");
+ if (paymentserver->init()) {
+   Serial.println((String)"OK");
+ } else {
+   Serial.println((String)"FAIL");
+ }
+
  // Wire.begin();
   WiFi.begin(wifiSSID, wifiPASS);
   int i = 0;
@@ -65,11 +93,11 @@ void loop() {
       
       screen_page_processing();
       
-      createInvoiceResponse resp = paymentConnector.createInvoice(nosats,memo);
+      PaymentInvoice resp = paymentserver->getInvoice(nosats,memo);
       
-      screen_qrdisplay(resp.payment_request);
+      screen_qrdisplay(resp.paymentRequest);
 
-      settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
+      settled = paymentserver->isInvoicePaid(resp.id);
       checkpaid(resp);
        
       key_val = "";
@@ -81,11 +109,11 @@ void loop() {
       
       nosats = 0;
       
-      createInvoiceResponse resp = paymentConnector.createInvoice(nosats,memo);
+      PaymentInvoice resp = paymentserver->getInvoice(nosats,memo);
       
-      screen_qrdisplay(resp.payment_request);
+      screen_qrdisplay(resp.paymentRequest);
       
-      settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
+      settled = paymentserver->isInvoicePaid(resp.id);
       checkpaid(resp);
       
       key_val = "";
@@ -142,12 +170,12 @@ void on_rates(){
     Serial.println(conversion);
 }
 
-void checkpaid(createInvoiceResponse resp){
+void checkpaid(PaymentInvoice resp){
      int counta = 0;
      bool tempi = false;
      while (tempi == false){
-       settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
-       if (settled == 0){
+       settled = paymentserver->isInvoicePaid(resp.id);
+       if (!settled){
           counta ++;
           if (counta == 100) {   
            tempi = true;

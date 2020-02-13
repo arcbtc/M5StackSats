@@ -25,6 +25,7 @@ M5.Lcd.println(String(nosats));
 
 void screen_qrdisplay(String xxx)
 {  
+Serial.println(xxx);
 M5.Lcd.fillScreen(BLACK); 
 M5.Lcd.qrcode(xxx,45,0,240,14);
 delay(100);
