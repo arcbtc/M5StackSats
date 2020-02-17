@@ -8,8 +8,8 @@
 ////BEGINNING OF USER SETUP/////
 
 //HARDWARE Uncomment for hardware used//
-#define M5STACK //Based on M5Stack Faces Kit
-//#define DIY //Based on ESP32/1.8TFT/Keypad Matrix
+#define M5STACK //Based on M5Stack Faces Kit //Select in tools>boards "M5STACK-Core-ESP32"
+//#define DIY //Based on ESP32/1.8TFT/Keypad Matrix  //Select in tools>boards "ESP32 Dev module"
 
 //WIFI Setup//
 char wifiSSID[] = "YOUR-SSID";
