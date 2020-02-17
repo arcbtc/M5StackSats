@@ -1,1 +1,1 @@
-Code refactor for M5STackSats and THeQuickening
+Code refactor for M5StackSats and TheQuickening
