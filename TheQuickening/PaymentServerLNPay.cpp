@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 
 #include "PaymentInvoice.h"
@@ -76,7 +75,7 @@ bool PaymentServerLNPay::isInvoicePaid(String id) {
 
 // PRIVATE METHODS
 
-String PaymentServerLNPay::createRequest(String method,String path, String data)
+String PaymentServerLNPay::createRequest(String method, String path, String data)
   {
     String payload;
     int httpCode;

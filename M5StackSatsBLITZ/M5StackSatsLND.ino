@@ -353,9 +353,7 @@ void reqinvoice(String value){
     
     const size_t capacity = JSON_OBJECT_SIZE(3) + 320;
     DynamicJsonDocument doc(capacity);
-
     deserializeJson(doc, content);
-
     const char* r_hash = doc["r_hash"];
     hash = r_hash;
     const char* payment_request = doc["payment_request"]; 
