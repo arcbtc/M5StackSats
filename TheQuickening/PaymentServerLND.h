@@ -11,6 +11,5 @@ class PaymentServerLND : public PaymentServer
    String readmacaroon;
    String invoicemacaroon;
    String tlscert;
-   HTTPClient http;
    String createRequest(String method, String path, String data, String macaroon);
 };

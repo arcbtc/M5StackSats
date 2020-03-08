@@ -11,27 +11,26 @@
 #define KEYBOARD_INT          5
 
 //Wifi details
-char wifiSSID[] = "YOUR-WIFI";
-char wifiPASS[] = "YOUR-WIFI-PASSWORD";
+char wifiSSID[] = "ROOM77";
+char wifiPASS[] = "allyourcoin";
 
 //BLITZ DETAILS
-const char*  server = "room77.raspiblitz.com"; 
+const char* server = "room77.raspiblitz.com"; 
 const int httpsPort = 443;
-const int lndport = 8080;
+const int lndport = 8077;
 String pubkey;
 String totcapacity;
 
 bool certcheck = false;
-String readmacaroon = "0201036c6e64028a01030a105dc5e03a7e5444d4ebbdbb513d1fc40f1201301a0f0a07616464726573731204726561641a0c0a04696e666f1204726561641a100a08696e766f696365731204726561641a0f0a076d6573736167651204726561641a100a086f6666636861696e1204726561641a0f0a076f6e636861696e1204726561641a0d0a05706565727312047265616400000620b964213f708bc349dc1de651b424817651858fcfffa38345f6c566053ee22cf5";
-String invoicemacaroon = "0201036c6e640247030a105ec5e03a7e5444d4ebbdbb513d1fc40f1201301a160a0761646472657373120472656164120577726974651a170a08696e766f69636573120472656164120577726974650000062062630006bd8cc1f7ce6be81d90dd2c1b754ecf7d7d0d794fe2c36fec5680876e";
+String readmacaroon = "0201036C6E64028A01030A10CCC987A6CE26FC4CF42676A6D1EE1D1C1201301A0F0A07616464726573731204726561641A0C0A04696E666F1204726561641A100A08696E766F696365731204726561641A0F0A076D6573736167651204726561641A100A086F6666636861696E1204726561641A0F0A076F6E636861696E1204726561641A0D0A0570656572731204726561640000062074D6B7847B83039162230EC94BD4CFB1E0FBC1FFF7B6E7BF001A3523F5289C9A";
+String invoicemacaroon = "0201036C6E640247030A10CFC987A6CE26FC4CF42676A6D1EE1D1C1201301A160A0761646472657373120472656164120577726974651A170A08696E766F69636573120472656164120577726974650000062013765C97050424F33D0FE4508D7A1A09D1772F7365FB95E2AECCAA4E1F35C782";
 //#include "TLSCert.h" //Un-comment if you need to include a TLS Cert, also uncomment line 279, 303, 360, 403
-
 
 String choice = "";
 
 String on_currency = "BTCEUR"; //currency can be changed here ie BTCUSD BTCGBP etc
 String on_sub_currency = on_currency.substring(3);
-String memo = "Memo "; //memo suffix, followed by the price then a random number
+String memo = "Room77 "; //memo suffix, followed by the price then a random number
 
   String key_val;
   String cntr = "0";
@@ -177,8 +176,12 @@ void loop() {
      M5.Lcd.setTextSize(4);
      M5.Lcd.setTextColor(TFT_GREEN);
      M5.Lcd.println("COMPLETE");
-
-     delay(1000);
+     M5.Speaker.tone(500);
+     delay(500);
+     M5.Speaker.tone(1000);
+     delay(500);
+     M5.Speaker.mute();
+     delay(2000);
      nodecheck();;
      cntr = "2";
  
@@ -297,7 +300,7 @@ void nodecheck(){
   bool checker = false;
   while(!checker){
   WiFiClientSecure client;
-   client.setCACert(test_root_ca);
+   //client.setCACert(test_root_ca);
   if (!client.connect(server, lndport)){
 
     M5.Lcd.fillScreen(BLACK);
@@ -351,14 +354,15 @@ void reqinvoice(String value){
 
     client.stop();
     
-    const size_t capacity = JSON_OBJECT_SIZE(3) + 320;
+    const size_t capacity = JSON_OBJECT_SIZE(3) + 512;
     DynamicJsonDocument doc(capacity);
     deserializeJson(doc, content);
     const char* r_hash = doc["r_hash"];
     hash = r_hash;
     const char* payment_request = doc["payment_request"]; 
     payreq = payment_request;
- 
+    //Serial.println(hash);
+    //Serial.println(payreq);
 }
 
 
@@ -454,7 +458,7 @@ void page_qrdisplay(String xxx)
 {  
 
   M5.Lcd.fillScreen(BLACK); 
-  M5.Lcd.qrcode(payreq,45,0,240,10);
+  M5.Lcd.qrcode(payreq,45,0,240,14);
   delay(100);
 
 }

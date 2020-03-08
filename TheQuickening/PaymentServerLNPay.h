@@ -11,6 +11,5 @@ class PaymentServerLNPay : public PaymentServer
    String api_endpoint;
    String invoice_create_endpoint;
    String invoice_check_endpoint;
-   HTTPClient http;
    String createRequest(String method, String path, String data);
 };

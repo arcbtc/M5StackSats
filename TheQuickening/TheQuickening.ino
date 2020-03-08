@@ -12,15 +12,17 @@
 String PAYMENTSERVER = "LND"; 
 
 //Payment Setup 
-String memo = "PoS "; //memo suffix, followed by a random number
-String on_currency = "BTCUSD"; //currency can be changed here ie BTCUSD BTCGBP etc
+String memoBase = "PoS "; //memo suffix, followed by a random number
+String memo="";
+String currencyBase="EUR";
+String on_currency = "BTC"+currencyBase; //currency can be changed here ie BTCUSD BTCGBP etc
 
 //Declare whether you're using the DIY or M5stackSats flavour
 #include "M5Stack.h"
 
 //WIFI Setup
-char wifiSSID[] = "raspiblitz";
-char wifiPASS[] = "raspiblitz";
+char wifiSSID[] = "ROOM77";
+char wifiPASS[] = "allyourcoin";
   
 //Variables
 String inputs = "";
@@ -45,14 +47,14 @@ void setup() {
 
  if (PAYMENTSERVER=="LNPAY")
  {
-   Serial.println((String)"Setting LND as Payment Server");
-   PaymentServerLND * lnd = new PaymentServerLND();
-   paymentserver = lnd;
- } else
- {
-   Serial.println((String)"Setting LNPay as Payment PaymentServer");
+   Serial.println((String)"Setting LNPAY as Payment Server");
    PaymentServerLNPay * lnpay = new PaymentServerLNPay();
    paymentserver = lnpay;
+ } else
+ {
+   Serial.println((String)"Setting LND as Payment PaymentServer");
+   PaymentServerLND * lnd = new PaymentServerLND();
+   paymentserver = lnd;
  }
  
  Serial.print((String)"Running as PaymentServer --> ");
@@ -137,7 +139,8 @@ void loop() {
     fiat = temp;
     satoshis = temp/conversion;
     nosats = (int) round(satoshis*100000000.0);
-    
+    memo =  memoBase + " " + fiat + " " + currencyBase;
+
     screen_input_sats(fiat, nosats);
 
     delay(100);

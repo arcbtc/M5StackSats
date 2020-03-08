@@ -11,15 +11,14 @@ String wallet_key;
 String api_endpoint;
 String invoice_create_endpoint;
 String invoice_check_endpoint;
-HTTPClient http;
 
 String PaymentServerLNPay::getServiceName() { return (String)"LNPAY"; }
 
 bool PaymentServerLNPay::init() {
 
     //API Setup
-    api_key = "3zB1DPk2bFwiocmjOasLJA4Tpfc2jUDB"; //  Public API key...Can be found here: https://lnpay.co/dashboard/integrations
-    wallet_key = "wi_ghDiaaRxecSHGcV8JrmITOtb"; // Invoice key...Can be found here: https://lnpay.co/dashboard/advanced-wallets
+    api_key = ""; //  Public API key...Can be found here: https://lnpay.co/dashboard/integrations
+    wallet_key = ""; // Invoice key...Can be found here: https://lnpay.co/dashboard/advanced-wallets
   
     //Endpoint Setup
     api_endpoint = "https://lnpay.co/v1";
@@ -79,31 +78,32 @@ String PaymentServerLNPay::createRequest(String method, String path, String data
   {
     String payload;
     int httpCode;
+    HTTPClient http;
 
     Serial.println("PaymentConnector::createRequest BEGIN-------");
     Serial.println("METHOD:" + method);
     Serial.println("URL:" + api_endpoint + path);
     Serial.println("DATA:" + data);
     
-    PaymentServerLNPay::http.begin(PaymentServerLNPay::api_endpoint + path); //Getting fancy to response size
-    PaymentServerLNPay::http.addHeader("Content-Type","application/json");
-    PaymentServerLNPay::http.addHeader("X-Api-Key",PaymentServerLNPay::api_key);
+    http.begin(PaymentServerLNPay::api_endpoint + path); //Getting fancy to response size
+    http.addHeader("Content-Type","application/json");
+    http.addHeader("X-Api-Key",PaymentServerLNPay::api_key);
     
     if (method.equals("POST"))
-      httpCode = PaymentServerLNPay::http.POST(data); //Make the request
+      httpCode = http.POST(data); //Make the request
     else if (method.equals("GET")) {
-      httpCode = PaymentServerLNPay::http.GET(); //Make the request
+      httpCode = http.GET(); //Make the request
     } else {
       Serial.println("This HTTP method usage is not defined");
     }
 
     if (httpCode > 0) { //Check for the returning code
-      payload = PaymentServerLNPay::http.getString();
+      payload = http.getString();
       Serial.println("RESPONSE:" + payload);
     } else {
       Serial.println("Error on HTTP request");
     }
-    PaymentServerLNPay::http.end(); //Free the resources
+    http.end(); //Free the resources
     Serial.println("PaymentConnector::createRequest END--------");
    
     return payload;
