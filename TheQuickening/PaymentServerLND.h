@@ -1,7 +1,7 @@
 class PaymentServerLND : public PaymentServer
 {
   public:
-   virtual boolean init();
+   virtual boolean init(String server, int restPort, String readMacaroonHex, String invoiceMacaroonHex);
    virtual String getServiceName();
    virtual PaymentInvoice getInvoice(int sats, String memo);
    virtual bool isInvoicePaid(String id);

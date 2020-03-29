@@ -14,16 +14,16 @@ String tlscert;
 
 String PaymentServerLND::getServiceName() { return (String)"LND"; }
 
-bool PaymentServerLND::init() {
-
-    // Credentials Setup (the HEX Strings from RaspiBlitz EXPORT)
-    readmacaroon = "";
-    invoicemacaroon = "";
-    tlscert= ""; // ignore for now
+bool PaymentServerLND::init(String server, int restPort, String readMacaroonHex, String invoiceMacaroonHex) {
 
     // Endpoint Setup
-    lndServer = "example.com";
-    lndRestApiPort = 8080;
+    lndServer = server; // domain or IP
+    lndRestApiPort = restPort; // default is 8080
+
+    // Credentials Setup (the HEX Strings from RaspiBlitz EXPORT)
+    readmacaroon = readMacaroonHex;
+    invoicemacaroon = invoiceMacaroonHex;
+    tlscert= ""; // ignore for now
 
     return true;
 }
