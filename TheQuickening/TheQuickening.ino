@@ -2,25 +2,29 @@
 #include <HTTPClient.h>
 #include <string.h>
 #include <ArduinoJson.h>
-#include "PaymentConnector.h"
 #include "LNimg.h"
 
-////BEGINNING OF USER SETUP/////
+#include "PaymentInvoice.h"
+#include "PaymentServer.h"
+#include "PaymentServerLNPay.h"
+#include "PaymentServerLND.h"
 
 //HARDWARE Uncomment for hardware used//
 #define M5STACK //Based on M5Stack Faces Kit
 //#define DIY //Based on ESP32/1.8TFT/Keypad Matrix
 
-//WIFI Setup//
-char wifiSSID[] = "raspiblitz";
-char wifiPASS[] = "raspiblitz";
+String PAYMENTSERVER = "LND"; 
 
-//Payment Setup//
-String memo = "PoS "; //memo suffix, followed by a random number
-String on_currency = "BTCUSD"; //currency can be changed here ie BTCUSD BTCGBP etc
+//WIFI Setup
+char wifiSSID[] = "ROOM77";
+char wifiPASS[] = "allyourcoin";
 
-//Currency selection//
-PaymentConnector paymentConnector("BTCUSD");
+//Payment Setup 
+String memoBase = "PoS "; //memo suffix, followed by a random number
+String memo="";
+String currencyBase="EUR";
+String on_currency = "BTC"+currencyBase; //currency can be changed here ie BTCUSD BTCGBP etc
+
 
 ////END OF USER SETUP///
 
@@ -39,8 +43,10 @@ float satoshis;
 int nosats;
 float temp; 
 float conversion;
-int settled;
+bool settled;
 bool cntr = false;
+
+PaymentServer *paymentserver;
 
 void setup() {
   
@@ -58,7 +64,30 @@ void setup() {
   
  screen_splash();
  Serial.begin(115200);
+
+ if (PAYMENTSERVER=="LNPAY")
+ {
+   Serial.println((String)"Setting LNPAY as Payment Server");
+   PaymentServerLNPay * lnpay = new PaymentServerLNPay();
+   paymentserver = lnpay;
+ } else
+ {
+   Serial.println((String)"Setting LND as Payment PaymentServer");
+   PaymentServerLND * lnd = new PaymentServerLND();
+   lnd->init("room77.raspiblitz.com",8077,"0201036C6E64028A01030A10CCC987A6CE26FC4CF42676A6D1EE1D1C1201301A0F0A07616464726573731204726561641A0C0A04696E666F1204726561641A100A08696E766F696365731204726561641A0F0A076D6573736167651204726561641A100A086F6666636861696E1204726561641A0F0A076F6E636861696E1204726561641A0D0A0570656572731204726561640000062074D6B7847B83039162230EC94BD4CFB1E0FBC1FFF7B6E7BF001A3523F5289C9A", "0201036C6E640247030A10CFC987A6CE26FC4CF42676A6D1EE1D1C1201301A160A0761646472657373120472656164120577726974651A170A08696E766F69636573120472656164120577726974650000062013765C97050424F33D0FE4508D7A1A09D1772F7365FB95E2AECCAA4E1F35C782");
+   paymentserver = lnd;
+ }
  
+ Serial.print((String)"Running as PaymentServer --> ");
+ Serial.println(paymentserver->getServiceName());
+
+ Serial.println((String)"Init PaymentServer Data ...");
+ if (paymentserver->init()) {
+   Serial.println((String)"OK");
+ } else {
+   Serial.println((String)"FAIL");
+ }
+
  // Wire.begin();
   WiFi.begin(wifiSSID, wifiPASS);
   int i = 0;
@@ -93,11 +122,11 @@ void loop() {
       
       screen_page_processing();
       
-      createInvoiceResponse resp = paymentConnector.createInvoice(nosats,memo);
+      PaymentInvoice resp = paymentserver->getInvoice(nosats,memo);
       
-      screen_qrdisplay(resp.payment_request);
+      screen_qrdisplay(resp.paymentRequest);
 
-      settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
+      settled = paymentserver->isInvoicePaid(resp.id);
       checkpaid(resp);
        
       key_val = "";
@@ -129,7 +158,8 @@ void loop() {
     fiat = temp;
     satoshis = temp/conversion;
     nosats = (int) round(satoshis*100000000.0);
-    
+    memo =  memoBase + " " + fiat + " " + currencyBase;
+
     screen_input_sats(fiat, nosats);
 
     delay(100);
@@ -162,13 +192,13 @@ void on_rates(){
     Serial.println(conversion);
 }
 
-void checkpaid(createInvoiceResponse resp){
+void checkpaid(PaymentInvoice resp){
      int counta = 0;
      bool tempi = false;
      
      while (tempi == false){
-       settled = paymentConnector.checkIfPaymentIsSettled(resp.payment_id);
-       if (settled == 0){
+       settled = paymentserver->isInvoicePaid(resp.id);
+       if (!settled){
           counta ++;
           if (counta == 100) {
             

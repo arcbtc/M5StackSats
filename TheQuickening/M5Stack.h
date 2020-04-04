@@ -25,6 +25,7 @@ M5.Lcd.println(String(nosats));
 
 void screen_qrdisplay(String xxx)
 {  
+Serial.println(xxx);
 M5.Lcd.fillScreen(BLACK); 
 M5.Lcd.qrcode(xxx,45,0,240,14);
 delay(100);
@@ -80,7 +81,12 @@ M5.Lcd.setCursor(60, 80);
 M5.Lcd.setTextSize(4);
 M5.Lcd.setTextColor(TFT_GREEN);
 M5.Lcd.println("COMPLETE");
-delay(1000);
+M5.Speaker.tone(500);
+delay(500);
+M5.Speaker.tone(1000);
+delay(500);
+M5.Speaker.mute();
+delay(2000);
 }
 
 void screen_cancel()
