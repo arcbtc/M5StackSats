@@ -16,8 +16,8 @@
 String PAYMENTSERVER = "LND"; 
 
 //WIFI Setup
-char wifiSSID[] = "ROOM77";
-char wifiPASS[] = "allyourcoin";
+char wifiSSID[] = <SSID>;
+char wifiPASS[] = <WIFI PASSWORD>;
 
 //Payment Setup 
 String memoBase = "PoS "; //memo suffix, followed by a random number
@@ -25,6 +25,11 @@ String memo="";
 String currencyBase="EUR";
 String on_currency = "BTC"+currencyBase; //currency can be changed here ie BTCUSD BTCGBP etc
 
+//LND Setup
+String LNDinvoiceMacaroonHex = <INVOICE MACAROON>;
+String LNDreadMacaroonHex = "<READ MACAROON>";
+int    LNDport = 8080;
+String LNDserver = <IP RASPIBLITZ>;
 
 ////END OF USER SETUP///
 
@@ -39,12 +44,20 @@ String on_currency = "BTC"+currencyBase; //currency can be changed here ie BTCUS
 //Variables
 String inputs = "";
 String fiat;
-float satoshis;
-int nosats;
+float satoshis, calc_satoshis;
+int nosats, calc_nosats;
 float temp; 
 float conversion;
 bool settled;
 bool cntr = false;
+
+//calc 
+float calc_sum;
+float calc_1, calc_2;
+String calc_fiat;
+String calc_inputs ="";
+bool calc_mode = false;
+
 
 PaymentServer *paymentserver;
 
@@ -104,7 +117,15 @@ void setup() {
 }
 
 void loop() {
-  screen_page_input();
+  screen_refresh();
+  if(calc_flag == false){
+    screen_page_input();
+  }
+  else{
+    screen_page_calc();
+  
+  }
+  
   bool cntr = false;
 
   while (cntr == false){
@@ -131,8 +152,24 @@ void loop() {
        
       key_val = "";
       inputs = "";
+      calc_inputs ="";
+      calc_flag = false;
       
     } 
+
+    #ifdef M5STACK
+   else if (M5.BtnB.wasReleased()) {
+  
+  
+    if(calc_flag == true){
+      calc_inputs ="";
+      screen_refresh();
+      screen_page_calc();
+    }
+
+      
+    }     
+  #endif
       
   #ifdef M5STACK
    else if (M5.BtnA.wasReleased()) {
@@ -148,26 +185,114 @@ void loop() {
 
       key_val = "";
       inputs = "";  
-      nosats = 0;
+      nosats = 0.0;
+      calc_sign ="";
+      calc_flag = false;
+      calc_inputs ="";
+      calc_sum = 0.0;
     }
-    
+
+// Display Logic
+
     Serial.print(key_val);
-    inputs += key_val;
-    temp = inputs.toInt();
-    temp = temp / 100;
-    fiat = temp;
-    satoshis = temp/conversion;
-    nosats = (int) round(satoshis*100000000.0);
-    memo =  memoBase + " " + fiat + " " + currencyBase;
+  
 
-    screen_input_sats(fiat, nosats);
+    if(calc_flag == true){
+     
+     
+      if(calc_sign == "="){
+        fiat = calc_sum;
+        calc_inputs = calc_sum;
+        calc_1 = calc_sum;
+        satoshis = calc_sum/conversion;
+        nosats = (int) round(satoshis*100000000.0);
+        memo =  memoBase + " " + fiat + " " + currencyBase;
+        
+        screen_input_sats(fiat, nosats);
+  
+        delay(100);
+        key_val = "";
+        calc_inputs ="";
 
-    delay(100);
-    key_val = "";
+      }
+        
+      else if(calc_sign == "+"  )
+      {
+        calc_inputs += key_val;
+        calc_2 = calc_inputs.toInt();
+        calc_2 = calc_2 / 100;
+        calc_fiat = calc_2;
+        
+        calc_sum = calc_1 + calc_2;
+       
+        
+        screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
+
+        delay(100);
+        key_val = "";
+        }
+        
+      // negative result will be set to zero
+      else if(calc_sign == "-"  )
+      {
+          calc_inputs += key_val;
+          calc_2 = calc_inputs.toInt();
+          calc_2 = calc_2 / 100;
+          calc_fiat = calc_2;
+            
+          calc_sum = calc_1 - calc_2;
+          if ((calc_1 - calc_2) < 0){
+            calc_sum = 0;
+          }
+       
+          screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
+          
+          delay(100);
+          key_val = "";
+      }
+      
+      // Multiply only by integer
+      else if(calc_sign == "*"  ) 
+      {
+          calc_inputs += key_val;
+          calc_2 = calc_inputs.toInt();
+          calc_fiat = calc_2;
+            
+          calc_sum = calc_1 * calc_2;
+        
+          screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
+          
+          delay(100);
+          key_val = "";
+      }
+
+    }
+    else
+    {
+      inputs += key_val;
+      calc_1 = inputs.toInt();
+      calc_1 = calc_1 / 100;
+      fiat = calc_1;
+     
+      satoshis = calc_1/conversion;
+      nosats = (int) round(satoshis*100000000.0);
+      memo =  memoBase + " " + fiat + " " + currencyBase;
+      
+      screen_input_sats(fiat, nosats);
+
+      delay(100);
+      key_val = "";
+    
+    }
   }
 
-  screen_page_input();
-  
+
+    screen_refresh();
+    screen_page_calc();
+    
+    if(calc_flag == true){
+      screen_page_calc();  
+    }
 }
 
 //OPENNODE REQUESTS
@@ -235,6 +360,7 @@ void checkpaid(PaymentInvoice resp){
         bee++;
         key_val = "";
         inputs = "";
+        calc_inputs = "";
      }
    }
    screen_page_input();
