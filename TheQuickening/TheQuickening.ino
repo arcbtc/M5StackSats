@@ -1,37 +1,16 @@
+#include <ArduinoJson.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
 #include <string.h>
-#include <ArduinoJson.h>
 #include "LNimg.h"
+#include "config.h"
 
 #include "PaymentInvoice.h"
 #include "PaymentServer.h"
 #include "PaymentServerLNPay.h"
 #include "PaymentServerLND.h"
 
-//HARDWARE Uncomment for hardware used//
-#define M5STACK //Based on M5Stack Faces Kit
-//#define DIY //Based on ESP32/1.8TFT/Keypad Matrix
 
-String PAYMENTSERVER = "LND"; 
-
-//WIFI Setup
-char wifiSSID[] = <SSID>;
-char wifiPASS[] = <WIFI PASSWORD>;
-
-//Payment Setup 
-String memoBase = "PoS "; //memo suffix, followed by a random number
-String memo="";
-String currencyBase="EUR";
-String on_currency = "BTC"+currencyBase; //currency can be changed here ie BTCUSD BTCGBP etc
-
-//LND Setup
-String LNDinvoiceMacaroonHex = <INVOICE MACAROON>;
-String LNDreadMacaroonHex = "<READ MACAROON>";
-int    LNDport = 8080;
-String LNDserver = <IP RASPIBLITZ>;
-
-////END OF USER SETUP///
 
 #ifdef DIY
   #include "DIYv.h"
@@ -64,92 +43,86 @@ PaymentServer *paymentserver;
 void setup() {
   
   #ifdef M5STACK
-   M5.begin();
-   pinMode(KEYBOARD_INT, INPUT_PULLUP);
-   Wire.begin();
+
+  M5.begin();
+  pinMode(KEYBOARD_INT, INPUT_PULLUP);
+  Wire.begin();
+  
   #endif
 
   #ifdef DIY
-   tft.begin();
-   tft.fillScreen(TFT_BLACK);
-   tft.setRotation(3);
+  tft.begin();
+  tft.fillScreen(TFT_BLACK);
+  tft.setRotation(3);
   #endif
   
- screen_splash();
- Serial.begin(115200);
+  screen_splash();
+  Serial.begin(115200);
 
- if (PAYMENTSERVER=="LNPAY")
- {
-   Serial.println((String)"Setting LNPAY as Payment Server");
-   PaymentServerLNPay * lnpay = new PaymentServerLNPay();
-   paymentserver = lnpay;
- } else
- {
-   Serial.println((String)"Setting LND as Payment PaymentServer");
-   PaymentServerLND * lnd = new PaymentServerLND();
-   lnd->init("room77.raspiblitz.com",8077,"0201036C6E64028A01030A10CCC987A6CE26FC4CF42676A6D1EE1D1C1201301A0F0A07616464726573731204726561641A0C0A04696E666F1204726561641A100A08696E766F696365731204726561641A0F0A076D6573736167651204726561641A100A086F6666636861696E1204726561641A0F0A076F6E636861696E1204726561641A0D0A0570656572731204726561640000062074D6B7847B83039162230EC94BD4CFB1E0FBC1FFF7B6E7BF001A3523F5289C9A", "0201036C6E640247030A10CFC987A6CE26FC4CF42676A6D1EE1D1C1201301A160A0761646472657373120472656164120577726974651A170A08696E766F69636573120472656164120577726974650000062013765C97050424F33D0FE4508D7A1A09D1772F7365FB95E2AECCAA4E1F35C782");
-   paymentserver = lnd;
- }
+  if (PAYMENTSERVER=="LNPAY") {
+    Serial.println((String)"Setting LNPAY as Payment Server");
+    PaymentServerLNPay * lnpay = new PaymentServerLNPay();
+    paymentserver = lnpay;
+  } 
+  else {
+    Serial.println((String)"Setting LND as Payment PaymentServer");
+    PaymentServerLND * lnd = new PaymentServerLND();
+    lnd->init(LNDserver, LNDport, LNDreadMacaroonHex, LNDinvoiceMacaroonHex);
+    paymentserver = lnd;
+  }
  
- Serial.print((String)"Running as PaymentServer --> ");
- Serial.println(paymentserver->getServiceName());
+  Serial.print((String)"Running as PaymentServer --> ");
+  Serial.println(paymentserver->getServiceName());
 
- Serial.println((String)"Init PaymentServer Data ...");
- if (paymentserver->init()) {
-   Serial.println((String)"OK");
- } else {
-   Serial.println((String)"FAIL");
- }
+  Serial.println((String)"Init PaymentServer Data ...");
+  if (paymentserver->init()) {
+    Serial.println((String)"OK");
+  } 
+  else {
+    Serial.println((String)"FAIL");
+  }
 
  // Wire.begin();
   WiFi.begin(wifiSSID, wifiPASS);
   int i = 0;
   while (WiFi.status() != WL_CONNECTED) {
-    if(i >= 5){
+    if(i >= 5) {
     screen_wifi_check();
     }
     delay(1000);
     i++;
   }
-  
   on_rates();
- 
 }
 
 void loop() {
   screen_refresh();
-  if(calc_flag == false){
-    screen_page_input();
-  }
-  else{
-    screen_page_calc();
-  
-  }
+  screen_page_input();
   
   bool cntr = false;
 
-  while (cntr == false){
+  while (cntr == false) {
     
     get_keypad(); 
 
+
   #ifdef M5STACK
-   if (M5.BtnC.wasReleased()) {
+    if (M5.BtnC.wasReleased()) {
   #endif
-  
+    
   #ifdef DIY
-   if (key_val == "#") {
+    if (key_val == "#") {
   #endif
-      
-      
+
       screen_page_processing();
-      
+    
       PaymentInvoice resp = paymentserver->getInvoice(nosats,memo);
       
       screen_qrdisplay(resp.paymentRequest);
 
       settled = paymentserver->isInvoicePaid(resp.id);
       checkpaid(resp);
-       
+      
       key_val = "";
       inputs = "";
       calc_inputs ="";
@@ -157,32 +130,24 @@ void loop() {
       
     } 
 
-    #ifdef M5STACK
-   else if (M5.BtnB.wasReleased()) {
-  
-  
-    if(calc_flag == true){
+  #ifdef M5STACK
+    else if (M5.BtnB.wasReleased()) {
       calc_inputs ="";
       screen_refresh();
-      screen_page_calc();
-    }
-
-      
+      screen_page_input();
     }     
   #endif
-      
+        
   #ifdef M5STACK
-   else if (M5.BtnA.wasReleased()) {
+    else if (M5.BtnA.wasReleased()) {
   #endif
-  
+    
   #ifdef DIY
-   else if (key_val == "*") {
+    else if (key_val == "*") {
   #endif
-      
+        
       screen_refresh();
-      
       screen_page_input();
-
       key_val = "";
       inputs = "";  
       nosats = 0.0;
@@ -192,107 +157,92 @@ void loop() {
       calc_sum = 0.0;
     }
 
-// Display Logic
-
-    Serial.print(key_val);
   
 
-    if(calc_flag == true){
-     
-     
+    Serial.print(key_val);
+
+    if(calc_flag == true) {
       if(calc_sign == "="){
+    
         fiat = calc_sum;
         calc_inputs = calc_sum;
         calc_1 = calc_sum;
+        inputs = calc_sum;
         satoshis = calc_sum/conversion;
         nosats = (int) round(satoshis*100000000.0);
-        memo =  memoBase + " " + fiat + " " + currencyBase;
-        
+        memo =  memoBase + " " + fiat + " " + currencyBase;  
         screen_input_sats(fiat, nosats);
-  
         delay(100);
         key_val = "";
         calc_inputs ="";
-
       }
-        
-      else if(calc_sign == "+"  )
-      {
+
+      else if(calc_sign == "+"  ) {
         calc_inputs += key_val;
         calc_2 = calc_inputs.toInt();
         calc_2 = calc_2 / 100;
         calc_fiat = calc_2;
         
         calc_sum = calc_1 + calc_2;
-       
-        
         screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
-
         delay(100);
         key_val = "";
-        }
-        
-      // negative result will be set to zero
-      else if(calc_sign == "-"  )
-      {
-          calc_inputs += key_val;
-          calc_2 = calc_inputs.toInt();
-          calc_2 = calc_2 / 100;
-          calc_fiat = calc_2;
-            
-          calc_sum = calc_1 - calc_2;
-          if ((calc_1 - calc_2) < 0){
-            calc_sum = 0;
-          }
-       
-          screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
-          
-          delay(100);
-          key_val = "";
       }
-      
+          
+      // negative result will be set to zero
+      else if(calc_sign == "-"  ) {   
+        calc_inputs += key_val;
+        calc_2 = calc_inputs.toInt();
+        calc_2 = calc_2 / 100;
+        calc_fiat = calc_2;
+              
+        calc_sum = calc_1 - calc_2;
+        if ((calc_1 - calc_2) < 0){
+          calc_sum = 0;
+        }
+        screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));      
+        delay(100);
+        key_val = "";
+      }
+        
       // Multiply only by integer
       else if(calc_sign == "*"  ) 
       {
-          calc_inputs += key_val;
-          calc_2 = calc_inputs.toInt();
-          calc_fiat = calc_2;
-            
-          calc_sum = calc_1 * calc_2;
-        
-          screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
-          
-          delay(100);
-          key_val = "";
+        calc_inputs += key_val;
+        calc_2 = calc_inputs.toInt();
+        calc_fiat = calc_2;
+              
+        calc_sum = calc_1 * calc_2;
+        screen_calc_sats(fiat, calc_sign, calc_fiat, String(calc_sum));
+        delay(100);
+        key_val = "";
       }
-
+      
+      else {
+        key_val = "";
+      }
     }
-    else
-    {
+    
+    else {
       inputs += key_val;
-      calc_1 = inputs.toInt();
+      calc_1 = inputs.toInt();      
       calc_1 = calc_1 / 100;
       fiat = calc_1;
-     
+        
       satoshis = calc_1/conversion;
       nosats = (int) round(satoshis*100000000.0);
       memo =  memoBase + " " + fiat + " " + currencyBase;
-      
+          
       screen_input_sats(fiat, nosats);
-
+    
       delay(100);
       key_val = "";
-    
+
     }
   }
-
-
-    screen_refresh();
-    screen_page_calc();
-    
-    if(calc_flag == true){
-      screen_page_calc();  
-    }
+  screen_refresh();
+  screen_page_input();
+  Serial.print((String)"\nSCREEN FLAG end"+calc_flag);
 }
 
 //OPENNODE REQUESTS

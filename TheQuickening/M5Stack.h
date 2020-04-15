@@ -7,6 +7,7 @@ String key_val,key_val2;
 String calc_sign ="";
 bool calc_flag = false;
 
+
 void screen_splash()
 {  
   M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)SplashM5_map);
@@ -16,22 +17,24 @@ void screen_input_sats(String fiat, int nosats)
 {
   M5.Lcd.setTextSize(3);
   M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
-  M5.Lcd.setCursor(70, 88);
-  M5.Lcd.println(fiat+"        ");
+  M5.Lcd.setCursor(30, 70);
+  M5.Lcd.println(fiat+" "+on_currency.substring(3)+"       ");
+  M5.Lcd.setTextSize(4);
   M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
-  M5.Lcd.setCursor(87, 136);
-  M5.Lcd.println(String(nosats));
+  M5.Lcd.setCursor(30, 136);
+  M5.Lcd.println(String(nosats)+" "+"sats"+"       ");
 }
 
 void screen_calc_sats(String fiat, String sign, String calc, String sum)
 {
   M5.Lcd.setTextSize(3);
-  M5.Lcd.setTextColor(TFT_BLUE, TFT_BLACK);
-  M5.Lcd.setCursor(70, 88);
-  M5.Lcd.println(fiat+" "+sign+" "+calc);
-  M5.Lcd.setTextColor(TFT_BLUE, TFT_BLACK);
-  M5.Lcd.setCursor(87, 136);
-  M5.Lcd.println(sum);
+  M5.Lcd.setTextColor(TFT_YELLOW, TFT_BLACK);
+  M5.Lcd.setCursor(30, 70);
+  M5.Lcd.println(fiat+" "+sign+" "+calc+" "+on_currency.substring(3)+"       ");
+  M5.Lcd.setTextSize(4);
+  M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+  M5.Lcd.setCursor(30, 136);
+  M5.Lcd.println(sum+" "+on_currency.substring(3)+"       ");
 }
 
 void screen_qrdisplay(String xxx)
@@ -63,36 +66,37 @@ void screen_page_input()
   M5.Lcd.fillScreen(BLACK);
   M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(0, 40);
-  M5.Lcd.println("Amount then C");
+  M5.Lcd.setCursor(30, 20);
+  M5.Lcd.println("OK for Invoice");
   M5.Lcd.println("");
-  M5.Lcd.println(on_currency.substring(3) + ": ");
   M5.Lcd.println("");
-  M5.Lcd.println("SATS: ");
+  M5.Lcd.println("");
+  M5.Lcd.println("");
   M5.Lcd.println("");
   M5.Lcd.println("");
   M5.Lcd.setTextSize(2);
   M5.Lcd.setCursor(30, 200);
-  M5.Lcd.println("Cancel          OK");
+  M5.Lcd.println("Cancel            OK");
+  
 }
 
-void screen_page_calc()
-{
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextColor(TFT_WHITE);
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(0, 40);
-  M5.Lcd.println("Calculator");
-  M5.Lcd.println("");
-  M5.Lcd.println(on_currency.substring(3) + ": ");
-  M5.Lcd.println("");
-  M5.Lcd.println("SUM: ");
-  M5.Lcd.println("");
-  M5.Lcd.println("");
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(30, 200);
-  M5.Lcd.println("Cancel    <      OK");
-}
+  void screen_page_calc()
+  {
+    M5.Lcd.fillScreen(BLACK);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setCursor(0, 40);
+    M5.Lcd.println("M5StackSats");
+    M5.Lcd.println("");
+    M5.Lcd.println("");
+    M5.Lcd.println("");
+    M5.Lcd.println("");
+    M5.Lcd.println("");
+    M5.Lcd.println("");
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(30, 200);
+    M5.Lcd.println("Cancel    <      OK");
+  }
 
 void screen_page_processing()
 { 
@@ -134,24 +138,6 @@ void screen_cancel()
   delay(1000);
 }
 
-void screen_calc()
-{
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextColor(TFT_WHITE);
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(0, 40);
-  M5.Lcd.println("Calculator");
-  M5.Lcd.println("");
-  M5.Lcd.println("Test");
-  M5.Lcd.println("");
-  M5.Lcd.println("SATS: ");
-  M5.Lcd.println("");
-  M5.Lcd.println("");
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(30, 200);
-  M5.Lcd.println("Cancel          OK");
-  
-}
 
 void get_keypad(){
   M5.update();
@@ -165,14 +151,19 @@ void get_keypad(){
         if(key >= 0x20 && key < 0x7F) { // ASCII String
           if (isdigit((char)key)){
             key_val = ((char)key);
+            Serial.print((String)"\nDIGIT "+key_val);
           }
-          else if(key == 0x42 || 0x43 || 0x45 || 0x61){ //check if arithmetic sign
+          else if(key == 42 || key == 43 || key ==45 || key == 61){ //check if arithmetic sign
+            Serial.print((String)"\nOPERATOR hex "+key);
             key_val = ((char)key);
             calc_sign= key_val;
+            Serial.print((String)"\nOPERATOR "+key_val);
             key_val = "";
             calc_flag = true;
+            
           } 
           else {
+            Serial.print((String)"\nVOID "+key_val);
             key_val = "";
           } 
         }
