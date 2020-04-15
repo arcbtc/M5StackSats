@@ -23,8 +23,8 @@
 //Variables
 String inputs = "";
 String fiat;
-float satoshis, calc_satoshis;
-int nosats, calc_nosats;
+float satoshis;
+int nosats;
 float temp; 
 float conversion;
 bool settled;
@@ -242,7 +242,6 @@ void loop() {
   }
   screen_refresh();
   screen_page_input();
-  Serial.print((String)"\nSCREEN FLAG end"+calc_flag);
 }
 
 //OPENNODE REQUESTS
