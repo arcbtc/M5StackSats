@@ -2,6 +2,7 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 
+
 #include "PaymentInvoice.h"
 #include "PaymentServer.h"
 #include "PaymentServerLNPay.h"
@@ -17,8 +18,8 @@ String PaymentServerLNPay::getServiceName() { return (String)"LNPAY"; }
 bool PaymentServerLNPay::init() {
 
     //API Setup
-    api_key = ""; //  Public API key...Can be found here: https://lnpay.co/dashboard/integrations
-    wallet_key = ""; // Invoice key...Can be found here: https://lnpay.co/dashboard/advanced-wallets
+    api_key = "pak_1m....."; //  Public API key...Can be found here: https://lnpay.co/dashboard/integrations
+    wallet_key = "waki_k....."; // Invoice key...Can be found here: https://lnpay.co/dashboard/advanced-wallets
   
     //Endpoint Setup
     api_endpoint = "https://lnpay.co/v1";
