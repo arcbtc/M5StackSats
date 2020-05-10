@@ -1,6 +1,6 @@
-![M5StackSats](https://i.imgur.com/zGZpYhn.png)
-
 # M5StackSats - Other funding sources
+
+![M5StackSats](https://i.imgur.com/zGZpYhn.png)
 
 A bitcoin Lightning-Network Point of Sale terminal using the ESP32 based M5Stack Faces Development Kit. Included in the kit is a keypad and charging dock, making it an ideal candidate for an cheap($55)/easy DIY bitcoin point of sale terminal.
 https://m5stack.com/products/face
