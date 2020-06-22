@@ -227,8 +227,6 @@ void on_rates(){
   while (client.connected()) {
     String line = client.readStringUntil('\n');
     if (line == "\r") {
-  Serial.println("poo");
-
       break;
     }
   }
