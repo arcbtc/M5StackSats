@@ -10,18 +10,18 @@
 
 //Details to change
 //Wifi details
-char wifiSSID[] = "YOUR-WIFI";
-char wifiPASS[] = "PASSWORD";
+char wifiSSID[] = "PLUSNET-XPNKJ"; //ENTER YOUR WIFI SSID (Case sensitive)
+char wifiPASS[] = "password"; //ENTER YOUR WIFI PASSWORD
+
+//LNBITS DETAILS
+const char* lnbitshost = "lnbits.com"; //ENTER YOUR LNBITS HOST
+String invoicekey = "63d93848c0fa44e3a0bc341cbdfb9735"; //ENTER YOUR LNBITS INVOICE KEY
+int httpsPort = 443;
 
 String pubkey;
 String totcapacity;
 const char* payment_request;
 bool certcheck = false;
-
-//LNBITS DETAILS
-int httpsPort = 443;
-const char* lnbitshost = "YOUR-LNBITS-HOST";
-String invoicekey = "YOUR-LNBITS-WALLET-KEY"; 
 
 String choice;
 String payhash;
@@ -117,17 +117,16 @@ void setup() {
     delay(1000);
     i++;
   }
-  
-
+  on_rates();
     
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
   
-  on_rates();
+  
  
 }
 
 void loop() {
-
+ 
  page_input();
 
   cntr = "1";
