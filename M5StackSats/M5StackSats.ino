@@ -8,16 +8,23 @@
 #define KEYBOARD_I2C_ADDR     0X08
 #define KEYBOARD_INT          5
 
-//Details to change
-//Wifi details
+////////////////////////Details to change///////////////////////////////////////
+
+//WIFI DETAILS
 char wifiSSID[] = "PLUSNET-XPNKJ"; //ENTER YOUR WIFI SSID (Case sensitive)
-char wifiPASS[] = "password"; //ENTER YOUR WIFI PASSWORD
+char wifiPASS[] = "paSsWoRd123?"; //ENTER YOUR WIFI PASSWORD
 
 //LNBITS DETAILS
 const char* lnbitshost = "lnbits.com"; //ENTER YOUR LNBITS HOST
 String invoicekey = "63d93848c0fa44e3a0bc341cbdfb9735"; //ENTER YOUR LNBITS INVOICE KEY
-int httpsPort = 443;
 
+//OTHER DETAILS
+String memo = "Memo "; //(OPTIONAL) CHANGE THE MEMO SUFFIX
+String on_currency = "BTCGBP"; //(OPTIONAL) CHANGE THE SHITCOIN FIAT
+
+////////////////////////////////////////////////////////////////////////////////
+
+int httpsPort = 443;
 String pubkey;
 String totcapacity;
 const char* payment_request;
@@ -25,9 +32,8 @@ bool certcheck = false;
 
 String choice;
 String payhash;
-String on_currency = "BTCGBP"; //currency can be changed here ie BTCUSD BTCGBP etc
 String on_sub_currency = on_currency.substring(3);
-String memo = "Memo "; //memo suffix, followed by the price then a random number
+
 
   String key_val;
   String cntr = "0";
