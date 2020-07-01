@@ -8,7 +8,7 @@
 #define KEYBOARD_I2C_ADDR     0X08
 #define KEYBOARD_INT          5
 
-////////////////////////Details to change///////////////////////////////////////
+////////////////////////DETAILS TO CHANGE///////////////////////////////////////
 
 //WIFI DETAILS
 char wifiSSID[] = "PLUSNET-XPNKJ"; //ENTER YOUR WIFI SSID (Case sensitive)
