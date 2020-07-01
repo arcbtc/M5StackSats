@@ -11,8 +11,8 @@
 ////////////////////////DETAILS TO CHANGE///////////////////////////////////////
 
 //WIFI DETAILS
-char wifiSSID[] = "PLUSNET-XPNKJ"; //ENTER YOUR WIFI SSID (Case sensitive)
-char wifiPASS[] = "paSsWoRd123?"; //ENTER YOUR WIFI PASSWORD
+char wifiSSID[] = "PLUSNET-XPUGF_EXT"; //ENTER YOUR WIFI SSID (Case sensitive)
+char wifiPASS[] = "PaSSwOrD123"; //ENTER YOUR WIFI PASSWORD
 
 //LNBITS DETAILS
 const char* lnbitshost = "lnbits.com"; //ENTER YOUR LNBITS HOST
@@ -252,12 +252,12 @@ void reqinvoice(String value){
     return;
   }
   
-  String topost = "{  \"value\" : \"" + nosats +"\", \"memo\" :\""+ memo + String(random(1,1000)) + "\"}";
-  String url = "/v1/invoices";
+  String topost = "{  \"out\" : false, \"amount\" : \"" + nosats +"\", \"memo\" :\""+ memo + String(random(1,1000)) + "\"}";
+  String url = "/api/v1/payments";
   client.print(String("POST ") + url +" HTTP/1.1\r\n" +
                 "Host: " + lnbitshost + "\r\n" +
                 "User-Agent: ESP32\r\n" +
-                "Grpc-Metadata-macaroon:"+ invoicekey +"\r\n" +
+                "X-Api-Key:"+ invoicekey +"\r\n" +
                 "Content-Type: application/json\r\n" +
                 "Connection: close\r\n" +
                 "Content-Length: " + topost.length() + "\r\n" +
@@ -282,8 +282,8 @@ void reqinvoice(String value){
   DynamicJsonDocument doc(capacity);
 
   deserializeJson(doc, line);
-  const char* pay_req = doc["pay_req"]; 
-  const char* payment_hash = doc["payment_hash"]; 
+  const char* pay_req = doc["payment_request"]; 
+  const char* payment_hash = doc["checking_id"]; 
   payreq = pay_req;
   Serial.println(payreq);
   payhash = payment_hash;
@@ -362,11 +362,11 @@ void checkpayment(){
   if (!client.connect(lnbitshost, httpsPort)) {
     return;
   }
-  String url = "/v1/invoice/";
+  String url = "/api/v1/payments/";
   client.print(String("GET ") + url + payhash +" HTTP/1.1\r\n" +
                 "Host: " + lnbitshost + "\r\n" +
                 "User-Agent: ESP32\r\n" +
-                "Grpc-Metadata-macaroon:"+ invoicekey +"\r\n" +
+                "X-Api-Key:"+ invoicekey +"\r\n" +
                 "Content-Type: application/json\r\n" +
                 "Connection: close\r\n\r\n");
 
