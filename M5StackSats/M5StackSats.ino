@@ -294,8 +294,7 @@ void checkpaid(){
      delay(2000);
      int counta = 0;
      int tempi = 0;
-     
-
+   
      while (tempi == 0){
 
      checkpayment();
@@ -316,7 +315,7 @@ void checkpaid(){
      M5.Lcd.setTextSize(4);
      M5.Lcd.setTextColor(TFT_GREEN);
      M5.Lcd.println("COMPLETE");
-
+     settle = false;
      delay(1000);
    
      cntr = "2";
