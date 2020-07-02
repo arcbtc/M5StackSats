@@ -369,7 +369,7 @@ void checkpayment(){
                 "Content-Type: application/json\r\n" +
                 "Connection: close\r\n\r\n");
 
-  String line = client.readString();
+   String line = client.readStringUntil('\n');
 
   Serial.println(line);
   const size_t capacity = JSON_OBJECT_SIZE(1) + 20;
