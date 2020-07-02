@@ -294,12 +294,13 @@ void checkpaid(){
      delay(2000);
      int counta = 0;
      int tempi = 0;
-     settle = false;
+     
 
      while (tempi == 0){
 
      checkpayment();
      if (settle == false){
+       
         counta ++;
         Serial.print(counta);
         if (counta == 100){
