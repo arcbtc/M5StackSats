@@ -370,14 +370,19 @@ void checkpayment(){
                 "Content-Type: application/json\r\n" +
                 "Connection: close\r\n\r\n");
 
+  String line = client.readString();
 
-  String line = client.readStringUntil('\n');
   Serial.println(line);
+  const size_t capacity = JSON_OBJECT_SIZE(2) + 400;
+  DynamicJsonDocument doc(capacity);
 
-  if (line == ""){
+  deserializeJson(doc, line);
+  bool invoicepaid = doc["paid"]; 
+
+  if (invoicepaid == false){
     settle = false;
   }
-  else{
+  else if(invoicepaid == true){
     settle = true;
   }
 }
