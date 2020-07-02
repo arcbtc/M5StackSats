@@ -251,7 +251,7 @@ void reqinvoice(String value){
     return;
   }
   
-  String topost = "{  \"out\" : false, \"amount\" : \"" + int(nosats) +"\", \"memo\" :\""+ memo + String(random(1,1000)) + "\"}";
+  String topost = "{  \"out\" : false, \"amount\" : " + nosats +", \"memo\" :\""+ memo + String(random(1,1000)) + "\"}";
   String url = "/api/v1/payments";
   client.print(String("POST ") + url +" HTTP/1.1\r\n" +
                 "Host: " + lnbitshost + "\r\n" +
