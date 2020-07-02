@@ -107,8 +107,7 @@ void setup() {
   M5.begin();
   M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)lnbits_map);
   Wire.begin();
-
-
+  Serial.begin(115200);
   //connect to local wifi            
   WiFi.begin(wifiSSID, wifiPASS);   
   int i = 0;
