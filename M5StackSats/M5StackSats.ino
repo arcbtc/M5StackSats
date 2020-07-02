@@ -291,7 +291,7 @@ void reqinvoice(String value){
 
 
 void checkpaid(){
-
+     delay(2000);
      int counta = 0;
      int tempi = 0;
      settle = false;
