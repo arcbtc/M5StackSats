@@ -372,7 +372,7 @@ void checkpayment(){
   String line = client.readString();
 
   Serial.println(line);
-  const size_t capacity = JSON_OBJECT_SIZE(2) + 400;
+  const size_t capacity = JSON_OBJECT_SIZE(1) + 20;
   DynamicJsonDocument doc(capacity);
 
   deserializeJson(doc, line);
