@@ -361,7 +361,7 @@ void checkpayment(){
   if (!client.connect(lnbitshost, httpsPort)) {
     return;
   }
-  String url = "/api/v1/payments/" + payhash;
+  String url = "/api/v1/payments/";
   client.print(String("GET ") + url + payhash +" HTTP/1.1\r\n" +
                 "Host: " + lnbitshost + "\r\n" +
                 "User-Agent: ESP32\r\n" +
