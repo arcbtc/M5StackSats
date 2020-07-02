@@ -376,14 +376,8 @@ void checkpayment(){
   DynamicJsonDocument doc(capacity);
 
   deserializeJson(doc, line);
-  bool invoicepaid = doc["paid"]; 
-
-  if (invoicepaid == false){
-    settle = false;
-  }
-  else if(invoicepaid == true){
-    settle = true;
-  }
+  settle = doc["paid"]; 
+  Serial.println(settle);
 }
 
 void page_qrdisplay(String xxx)
