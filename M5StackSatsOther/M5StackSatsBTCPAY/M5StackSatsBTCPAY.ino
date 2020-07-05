@@ -155,10 +155,12 @@ void get_keypad()
   }
 }
 
-void page_qrdisplay(String xxx)
+void page_qrdisplay(String payReq)
 {
+  payReq.toUpperCase();
+  Serial.println("QRCODE: " + payReq);
   M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.qrcode(invoicePayReq, 45, 0, 240, 10);
+  M5.Lcd.qrcode(payReq, 45, 0, 240, 10);
   delay(100);
 }
 
