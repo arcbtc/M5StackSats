@@ -42,31 +42,52 @@ String invoiceStatus = "";
 String hash = "";
 String currency = currencyPair.substring(4);
 bool settled = false;
-bool convAvailable;
+bool hasConversion;
 
-void page_input()
+void page_input(bool reset)
 {
-  M5.Lcd.fillScreen(BLACK);
+  if (reset) M5.Lcd.fillScreen(BLACK);
   
-  if (convAvailable) {
+  if (hasConversion) {
+    // Headline
     M5.Lcd.setTextColor(TFT_WHITE);
     M5.Lcd.setTextSize(2);
     M5.Lcd.setCursor(65, 20);
     M5.Lcd.println("Enter the amount");
-    M5.Lcd.setTextSize(3);
+
+    // Fiat
     M5.Lcd.setCursor(20, 70);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(TFT_WHITE);
     M5.Lcd.println(currencyFiat + ": ");
+    M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    M5.Lcd.setCursor(120, 70);
+    M5.Lcd.println(fiat);
+
+    // Sats
     M5.Lcd.setCursor(20, 100);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(TFT_WHITE);
     M5.Lcd.println("Sats: ");
-    M5.Lcd.println("");
-    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    M5.Lcd.setCursor(120, 100);
+    M5.Lcd.println(sats);
+
+    // Rate
     M5.Lcd.setCursor(48, 160);
-    M5.Lcd.println("Rate: " + String(conversion));
-    M5.Lcd.println("");
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println("Rate: " + String(conversion) + " " + currencyFiat);
+
+    // Buttons
     M5.Lcd.setCursor(37, 220);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_WHITE);
     M5.Lcd.println("Reset");
-    M5.Lcd.setCursor(214, 220);
-    M5.Lcd.println("Proceed");
+    if (sats.toInt() > 0) {
+      M5.Lcd.setCursor(215, 220);
+      M5.Lcd.println("Proceed");
+    }
   } else {
     M5.Lcd.setCursor(23, 90);
     M5.Lcd.setTextSize(3);
@@ -100,6 +121,16 @@ void page_error(String message)
   M5.Lcd.println(message);
   M5.Lcd.setCursor(214, 220);
   M5.Lcd.println("Retry");
+}
+
+void reset_input()
+{
+  key_val = "";
+  inputs = "";
+  sats = "";
+  
+  get_exchange_rate();
+  page_input(true);
 }
 
 void get_keypad()
@@ -154,12 +185,10 @@ void setup()
   }
 
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
-
-  get_exchange_rate();
 }
 
 void loop() {
-  page_input();
+  reset_input();
 
   cntr = "1";
 
@@ -167,8 +196,8 @@ void loop() {
     M5.update();
     get_keypad();
 
-    if (convAvailable) {
-      if (M5.BtnC.wasReleased()) {
+    if (hasConversion) {
+      if (sats.toInt() > 0 && M5.BtnC.wasReleased()) {
         page_processing();
   
         generate_invoice(fiat);
@@ -203,8 +232,7 @@ void loop() {
             M5.Lcd.fillScreen(BLACK);
             M5.Lcd.setTextColor(TFT_WHITE);
   
-            get_exchange_rate();
-            page_input();
+            reset_input();
           }
   
           int bee = 0;
@@ -222,8 +250,7 @@ void loop() {
   
               delay(doneStateDuration * 1000);
   
-              get_exchange_rate();
-              page_input();
+              reset_input();
             }
   
             delay(10);
@@ -238,13 +265,7 @@ void loop() {
       }
   
       else if (M5.BtnA.wasReleased()) {
-        M5.Lcd.fillScreen(BLACK);
-        M5.Lcd.setCursor(0, 0);
-        M5.Lcd.setTextColor(TFT_WHITE);
-        page_input();
-        key_val = "";
-        inputs = "";
-        sats = "";
+        reset_input();
       }
 
       inputs += key_val;
@@ -258,24 +279,15 @@ void loop() {
   
       sats = String(intsats);
 
-      M5.Lcd.setTextSize(3);
-      M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
-      M5.Lcd.setCursor(120, 70);
-      M5.Lcd.println(fiat);
-      M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
-      M5.Lcd.setCursor(120, 100);
-      M5.Lcd.println(sats);
-  
+      page_input(false);
+
       delay(100);
       key_val = "";
     }
     
     else {
-      fiat = "";
-      sats = "";
-      
       if (M5.BtnB.wasReleased()) {
-        get_exchange_rate();
+        reset_input();
       }
     }
   }
@@ -338,7 +350,7 @@ void get_exchange_rate()
 
   // Get the conversion rate
   conversion = doc["data"][0]["rate"];
-  convAvailable = conversion > 0.0;
+  hasConversion = conversion > 0.0;
 }
 
 void generate_invoice(String value)
