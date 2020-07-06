@@ -42,28 +42,64 @@ String invoiceStatus = "";
 String hash = "";
 String currency = currencyPair.substring(4);
 bool settled = false;
+bool hasConversion;
 
-void page_input()
+void page_input(bool reset)
 {
-  M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.setTextColor(TFT_WHITE);
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(65, 20);
-  M5.Lcd.println("Enter the amount");
-  M5.Lcd.setTextSize(3);
-  M5.Lcd.setCursor(20, 70);
-  M5.Lcd.println(currencyFiat + ": ");
-  M5.Lcd.setCursor(20, 100);
-  M5.Lcd.println("Sats: ");
-  M5.Lcd.println("");
-  M5.Lcd.setTextSize(2);
-  M5.Lcd.setCursor(48, 160);
-  M5.Lcd.println("Rate: " + String(conversion));
-  M5.Lcd.println("");
-  M5.Lcd.setCursor(37, 220);
-  M5.Lcd.println("Reset");
-  M5.Lcd.setCursor(214, 220);
-  M5.Lcd.println("Proceed");
+  if (reset) M5.Lcd.fillScreen(BLACK);
+  
+  if (hasConversion) {
+    // Headline
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setCursor(65, 20);
+    M5.Lcd.println("Enter the amount");
+
+    // Fiat
+    M5.Lcd.setCursor(20, 70);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println(currencyFiat + ": ");
+    M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
+    M5.Lcd.setCursor(120, 70);
+    M5.Lcd.println(fiat);
+
+    // Sats
+    M5.Lcd.setCursor(20, 100);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println("Sats: ");
+    M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
+    M5.Lcd.setCursor(120, 100);
+    M5.Lcd.println(sats);
+
+    // Rate
+    M5.Lcd.setCursor(48, 160);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println("Rate: " + String(conversion) + " " + currencyFiat);
+
+    // Buttons
+    M5.Lcd.setCursor(37, 220);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println("Reset");
+    if (sats.toInt() > 0) {
+      M5.Lcd.setCursor(215, 220);
+      M5.Lcd.println("Proceed");
+    }
+  } else {
+    M5.Lcd.setCursor(23, 90);
+    M5.Lcd.setTextSize(3);
+    M5.Lcd.setTextColor(TFT_RED);
+    M5.Lcd.println("Conversion rate");
+    M5.Lcd.setCursor(43, 120);
+    M5.Lcd.println("not available");
+    M5.Lcd.setCursor(128, 220);
+    M5.Lcd.setTextSize(2);
+    M5.Lcd.setTextColor(TFT_WHITE);
+    M5.Lcd.println("Retry");
+  }
 }
 
 void page_processing()
@@ -73,6 +109,28 @@ void page_processing()
   M5.Lcd.setTextSize(4);
   M5.Lcd.setTextColor(TFT_WHITE);
   M5.Lcd.println("PROCESSING");
+}
+
+void page_error(String message)
+{
+  Serial.println("ERR: " + message);
+  M5.Lcd.fillScreen(BLACK);
+  M5.Lcd.setCursor(40, 80);
+  M5.Lcd.setTextSize(2);
+  M5.Lcd.setTextColor(TFT_RED);
+  M5.Lcd.println(message);
+  M5.Lcd.setCursor(214, 220);
+  M5.Lcd.println("Retry");
+}
+
+void reset_input()
+{
+  key_val = "";
+  inputs = "";
+  sats = "";
+  
+  get_exchange_rate();
+  page_input(true);
 }
 
 void get_keypad()
@@ -97,10 +155,12 @@ void get_keypad()
   }
 }
 
-void page_qrdisplay(String xxx)
+void page_qrdisplay(String payReq)
 {
+  payReq.toUpperCase();
+  Serial.println("QRCODE: " + payReq);
   M5.Lcd.fillScreen(BLACK);
-  M5.Lcd.qrcode(invoicePayReq, 45, 0, 240, 10);
+  M5.Lcd.qrcode(payReq, 45, 0, 240, 10);
   delay(100);
 }
 
@@ -127,12 +187,10 @@ void setup()
   }
 
   pinMode(KEYBOARD_INT, INPUT_PULLUP);
-
-  get_exchange_rate();
 }
 
 void loop() {
-  page_input();
+  reset_input();
 
   cntr = "1";
 
@@ -140,110 +198,104 @@ void loop() {
     M5.update();
     get_keypad();
 
-    if (M5.BtnC.wasReleased()) {
-      page_processing();
-
-      generate_invoice(fiat);
-      
-      settled = false;
-
-      page_qrdisplay(invoicePayReq);
-
-      int counta = 0;
-      int tempi = 0;
-
-      while (tempi == 0) {
-        if (invoiceStatus != "complete") {
-          counta ++;
-          if (counta == 50) {
+    if (hasConversion) {
+      if (sats.toInt() > 0 && M5.BtnC.wasReleased()) {
+        page_processing();
+  
+        generate_invoice(fiat);
+  
+        settled = false;
+  
+        page_qrdisplay(invoicePayReq);
+  
+        int counta = 0;
+        int tempi = 0;
+  
+        while (tempi == 0) {
+          if (invoiceStatus != "complete") {
+            counta ++;
+            if (counta == 50) {
+              tempi = 1;
+            }
+            delay(invoiceCheckFrequency * 1000);
+            check_payment(invoiceId);
+          } else {
             tempi = 1;
-          }
-          delay(invoiceCheckFrequency * 1000);
-          check_payment(invoiceId);
-        } else {
-          tempi = 1;
-          settled = true;
-
-          M5.Lcd.fillScreen(BLACK);
-          M5.Lcd.setCursor(40, 80);
-          M5.Lcd.setTextSize(4);
-          M5.Lcd.setTextColor(TFT_GREEN);
-          M5.Lcd.println("THANKS! :)");
-
-          delay(doneStateDuration * 1000);
-          
-          M5.Lcd.fillScreen(BLACK);
-          M5.Lcd.setTextColor(TFT_WHITE);
-
-          get_exchange_rate();
-          page_input();
-        }
-
-        int bee = 0;
-        while ((bee < 120) && (tempi == 0)) {
-          M5.update();
-
-          if (M5.BtnA.wasReleased()) {
-            tempi = -1;
-
+            settled = true;
+  
             M5.Lcd.fillScreen(BLACK);
             M5.Lcd.setCursor(40, 80);
             M5.Lcd.setTextSize(4);
-            M5.Lcd.setTextColor(TFT_RED);
-            M5.Lcd.println("CANCELLED :(");
-
+            M5.Lcd.setTextColor(TFT_GREEN);
+            M5.Lcd.println("THANKS! :)");
+  
             delay(doneStateDuration * 1000);
-
-            get_exchange_rate();
-            page_input();
+  
+            M5.Lcd.fillScreen(BLACK);
+            M5.Lcd.setTextColor(TFT_WHITE);
+  
+            reset_input();
           }
-
-          delay(10);
-          bee++;
-          key_val = "";
-          inputs = "";
+  
+          int bee = 0;
+          while ((bee < 120) && (tempi == 0)) {
+            M5.update();
+  
+            if (M5.BtnA.wasReleased()) {
+              tempi = -1;
+  
+              M5.Lcd.fillScreen(BLACK);
+              M5.Lcd.setCursor(40, 80);
+              M5.Lcd.setTextSize(4);
+              M5.Lcd.setTextColor(TFT_RED);
+              M5.Lcd.println("CANCELLED :(");
+  
+              delay(doneStateDuration * 1000);
+  
+              reset_input();
+            }
+  
+            delay(10);
+            bee++;
+            key_val = "";
+            inputs = "";
+          }
         }
+  
+        key_val = "";
+        inputs = "";
+      }
+  
+      else if (M5.BtnA.wasReleased()) {
+        reset_input();
       }
 
+      inputs += key_val;
+
+      temp = inputs.toInt();
+      temp = temp / 100;
+      fiat = temp;
+      satoshis = temp / conversion;
+  
+      int intsats = (int) round(satoshis * 100000000.0);
+  
+      sats = String(intsats);
+
+      page_input(false);
+
+      delay(100);
       key_val = "";
-      inputs = "";
     }
-
-    else if (M5.BtnA.wasReleased()) {
-      M5.Lcd.fillScreen(BLACK);
-      M5.Lcd.setCursor(0, 0);
-      M5.Lcd.setTextColor(TFT_WHITE);
-      page_input();
-      key_val = "";
-      inputs = "";
-      sats = "";
+    
+    else {
+      if (M5.BtnB.wasReleased()) {
+        reset_input();
+      }
     }
-
-    inputs += key_val;
-
-    temp = inputs.toInt();
-    temp = temp / 100;
-    fiat = temp;
-    satoshis = temp / conversion;
-
-    int intsats = (int) round(satoshis * 100000000.0);
-
-    sats = String(intsats);
-    M5.Lcd.setTextSize(3);
-    M5.Lcd.setTextColor(TFT_RED, TFT_BLACK);
-    M5.Lcd.setCursor(120, 70);
-    M5.Lcd.println(fiat);
-    M5.Lcd.setTextColor(TFT_GREEN, TFT_BLACK);
-    M5.Lcd.setCursor(120, 100);
-    M5.Lcd.println(sats);
-
-    delay(100);
-    key_val = "";
   }
 }
 
 // --- HELPERS
-
 String get_request_body(WiFiClientSecure &client)
 {
   // skip headers
@@ -266,6 +318,8 @@ String get_request_body(WiFiClientSecure &client)
     }
   }
 
+  reqBody.trim();
+
   return reqBody;
 }
 
@@ -274,14 +328,14 @@ String get_request_body(WiFiClientSecure &client)
 void get_exchange_rate()
 {
   WiFiClientSecure client;
-  if (!client.connect(server, httpsPort)) return;
+  if (!client.connect(server, httpsPort)) return page_error("Could not get exchange rate, connection failed.");
 
   // Send HTTP request
   String reqStr = String("GET ") + "/rates?currencyPairs=" + currencyPair;
   client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
-               "Content-Type: application/json\r\n" +
+               "Content-Type: application/json; charset=utf-8\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n\r\n");
@@ -291,13 +345,14 @@ void get_exchange_rate()
   String json = get_request_body(client);
   client.stop();
   Serial.println("RES: " + json);
-  
+
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(5) + 80;
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
 
   // Get the conversion rate
   conversion = doc["data"][0]["rate"];
+  hasConversion = conversion > 0.0;
 }
 
 void generate_invoice(String value)
@@ -310,7 +365,7 @@ void generate_invoice(String value)
   client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
-               "Content-Type: application/json\r\n" +
+               "Content-Type: application/json; charset=utf-8\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n" +
@@ -318,13 +373,13 @@ void generate_invoice(String value)
                "\r\n" +
                payload + "\n");
   Serial.println("REQ: " + reqStr + " " + payload);
-  
+
   // Get and parse JSON body
   String json = get_request_body(client);
   client.stop();
   Serial.println("RES: " + json);
-  
-  const size_t capacity = 2*JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 9*JSON_OBJECT_SIZE(1) + 6*JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37) + 3400;
+
+  const size_t capacity = 2 * JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 9 * JSON_OBJECT_SIZE(1) + 6 * JSON_OBJECT_SIZE(2) + 5 * JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2 * JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37) + 3400;
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
 
@@ -334,7 +389,7 @@ void generate_invoice(String value)
   String _invoiceId = data["id"];
   String _invoiceStatus = data["status"];
   String _invoicePayReq = data["addresses"]["BTC_LightningLike"];
-  
+
   invoiceId = _invoiceId;
   invoiceStatus = _invoiceStatus;
   invoicePayReq = _invoicePayReq;
@@ -355,7 +410,7 @@ void check_payment(String invId)
   client.print(reqStr + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
-               "Content-Type: application/json\r\n" +
+               "Content-Type: application/json; charset=utf-8\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n\r\n");
@@ -365,16 +420,16 @@ void check_payment(String invId)
   String json = get_request_body(client);
   client.stop();
   Serial.println("RES: " + json);
-  
-  const size_t capacity = 2*JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 10*JSON_OBJECT_SIZE(1) + 5*JSON_OBJECT_SIZE(2) + 5*JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2*JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37);
+
+  const size_t capacity = 2 * JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 10 * JSON_OBJECT_SIZE(1) + 5 * JSON_OBJECT_SIZE(2) + 5 * JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2 * JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37);
   DynamicJsonDocument doc(capacity);
   deserializeJson(doc, json);
 
   // Get the invoice status
   JsonObject data = doc["data"];
   String _invoiceStatus = data["status"];
-  
+
   invoiceStatus = _invoiceStatus;
-  
+
   Serial.println("Invoice status: " + invoiceStatus);
 }
