@@ -136,7 +136,7 @@ void reset_input()
 void get_keypad()
 {
   if (digitalRead(KEYBOARD_INT) == LOW) {
-    Wire.requestFrom(KEYBOARD_I2C_ADDR, 1);  // request 1 byte from keyboard
+    Wire.requestFrom(KEYBOARD_I2C_ADDR, 1); // request 1 byte from keyboard
     while (Wire.available()) {
       uint8_t key = Wire.read(); // receive a byte as character
       key_val = key;
@@ -182,7 +182,7 @@ void setup()
       M5.Lcd.setTextColor(TFT_RED);
       M5.Lcd.println("WIFI NOT CONNECTED");
     }
-    delay(1000);
+    delay(5000);
     i++;
   }
 
@@ -323,28 +323,45 @@ String get_request_body(WiFiClientSecure &client)
   return reqBody;
 }
 
-// --- REQUESTS
-
-void get_exchange_rate()
+String request_json(String action, String payload)
 {
   WiFiClientSecure client;
-  if (!client.connect(server, httpsPort)) return page_error("Could not get exchange rate, connection failed.");
+  if (!client.connect(server, httpsPort)) {
+    Serial.println("ERR: Connection error");
+    char err_buf[100];
+    if (client.lastError(err_buf, 100) < 0) {
+        Serial.println(err_buf);
+    }
+    page_error("Connection failed.");
+    return "";
+  }
 
-  // Send HTTP request
-  String reqStr = String("GET ") + "/rates?currencyPairs=" + currencyPair;
-  client.print(reqStr + " HTTP/1.1\r\n" +
+  Serial.println("REQ: " + action + " " + payload);
+  
+  // Get and parse JSON body
+  client.print(action + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
                "Content-Type: application/json; charset=utf-8\r\n" +
                "Accept: application/json\r\n" +
                "Authorization: Basic " + encodedApiKey + "\r\n" +
-               "Connection: close\r\n\r\n");
-  Serial.println("REQ: " + reqStr);
-
-  // Get and parse JSON body
+               "Connection: close\r\n" + 
+               "Content-Length: " + payload.length() + "\r\n\r\n" + payload + "\r\n");
   String json = get_request_body(client);
   client.stop();
+  
   Serial.println("RES: " + json);
+
+  return json;
+}
+
+// --- REQUESTS
+
+void get_exchange_rate()
+{
+  String action = "GET /rates?currencyPairs=" + currencyPair;
+  String json = request_json(action, "");
+  if (json.length() == 0) return page_error("Exchange rate request failed.");
 
   const size_t capacity = JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(5) + 80;
   DynamicJsonDocument doc(capacity);
@@ -357,27 +374,10 @@ void get_exchange_rate()
 
 void generate_invoice(String value)
 {
-  WiFiClientSecure client;
-  if (!client.connect(server, httpsPort)) return;
-
+  String action = "POST /invoices/";
   String payload = "{\"price\":\"" + value + "\",\"currency\":\"" + currency  + "\",\"itemDesc\":\"" + description  + "\"}";
-  String reqStr = String("POST ") + "/invoices/";
-  client.print(reqStr + " HTTP/1.1\r\n" +
-               "Host: " + server + "\r\n" +
-               "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
-               "Content-Type: application/json; charset=utf-8\r\n" +
-               "Accept: application/json\r\n" +
-               "Authorization: Basic " + encodedApiKey + "\r\n" +
-               "Connection: close\r\n" +
-               "Content-Length: " + payload.length() + "\r\n" +
-               "\r\n" +
-               payload + "\n");
-  Serial.println("REQ: " + reqStr + " " + payload);
-
-  // Get and parse JSON body
-  String json = get_request_body(client);
-  client.stop();
-  Serial.println("RES: " + json);
+  String json = request_json(action, payload);
+  if (json.length() == 0) return page_error("Generating invoice failed.");
 
   const size_t capacity = 2 * JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 9 * JSON_OBJECT_SIZE(1) + 6 * JSON_OBJECT_SIZE(2) + 5 * JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2 * JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37) + 3400;
   DynamicJsonDocument doc(capacity);
@@ -403,23 +403,9 @@ void generate_invoice(String value)
 
 void check_payment(String invId)
 {
-  WiFiClientSecure client;
-  if (!client.connect(server, httpsPort)) return;
-
-  String reqStr = String("GET ") + "/invoices/" + invId;
-  client.print(reqStr + " HTTP/1.1\r\n" +
-               "Host: " + server + "\r\n" +
-               "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
-               "Content-Type: application/json; charset=utf-8\r\n" +
-               "Accept: application/json\r\n" +
-               "Authorization: Basic " + encodedApiKey + "\r\n" +
-               "Connection: close\r\n\r\n");
-  Serial.println("REQ: " + reqStr);
-
-  // Get and parse JSON body
-  String json = get_request_body(client);
-  client.stop();
-  Serial.println("RES: " + json);
+  String action = "GET /invoices/" + invId;
+  String json = request_json(action, "");
+  if (json.length() == 0) return page_error("Checking payment failed.");
 
   const size_t capacity = 2 * JSON_ARRAY_SIZE(0) + JSON_ARRAY_SIZE(2) + 10 * JSON_OBJECT_SIZE(1) + 5 * JSON_OBJECT_SIZE(2) + 5 * JSON_OBJECT_SIZE(5) + JSON_OBJECT_SIZE(9) + 2 * JSON_OBJECT_SIZE(15) + JSON_OBJECT_SIZE(37);
   DynamicJsonDocument doc(capacity);
