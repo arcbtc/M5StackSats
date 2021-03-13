@@ -21,6 +21,31 @@ String currencyPair = "BTC_EUR";  // Currency pair
 String currencyFiat = "Euro";  // Fiat display name
 String description = "M5StackSats"; // Invoice description
 
+// SSL Root CA – see this tutorial on how to retrieve yours:
+// https://techtutorialsx.com/2017/11/18/esp32-arduino-https-get-request/
+// This one is the DST Root CA X3, it works for Let's Encrypt certificates:
+const char* root_ca= \
+  "-----BEGIN CERTIFICATE-----\n" \
+  "MIIDSjCCAjKgAwIBAgIQRK+wgNajJ7qJMDmGLvhAazANBgkqhkiG9w0BAQUFADA/\n" \
+  "MSQwIgYDVQQKExtEaWdpdGFsIFNpZ25hdHVyZSBUcnVzdCBDby4xFzAVBgNVBAMT\n" \
+  "DkRTVCBSb290IENBIFgzMB4XDTAwMDkzMDIxMTIxOVoXDTIxMDkzMDE0MDExNVow\n" \
+  "PzEkMCIGA1UEChMbRGlnaXRhbCBTaWduYXR1cmUgVHJ1c3QgQ28uMRcwFQYDVQQD\n" \
+  "Ew5EU1QgUm9vdCBDQSBYMzCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB\n" \
+  "AN+v6ZdQCINXtMxiZfaQguzH0yxrMMpb7NnDfcdAwRgUi+DoM3ZJKuM/IUmTrE4O\n" \
+  "rz5Iy2Xu/NMhD2XSKtkyj4zl93ewEnu1lcCJo6m67XMuegwGMoOifooUMM0RoOEq\n" \
+  "OLl5CjH9UL2AZd+3UWODyOKIYepLYYHsUmu5ouJLGiifSKOeDNoJjj4XLh7dIN9b\n" \
+  "xiqKqy69cK3FCxolkHRyxXtqqzTWMIn/5WgTe1QLyNau7Fqckh49ZLOMxt+/yUFw\n" \
+  "7BZy1SbsOFU5Q9D8/RhcQPGX69Wam40dutolucbY38EVAjqr2m7xPi71XAicPNaD\n" \
+  "aeQQmxkqtilX4+U9m5/wAl0CAwEAAaNCMEAwDwYDVR0TAQH/BAUwAwEB/zAOBgNV\n" \
+  "HQ8BAf8EBAMCAQYwHQYDVR0OBBYEFMSnsaR7LHH62+FLkHX/xBVghYkQMA0GCSqG\n" \
+  "SIb3DQEBBQUAA4IBAQCjGiybFwBcqR7uKGY3Or+Dxz9LwwmglSBd49lZRNI+DT69\n" \
+  "ikugdB/OEIKcdBodfpga3csTS7MgROSR6cz8faXbauX+5v3gTt23ADq1cEmv8uXr\n" \
+  "AvHRAosZy5Q6XkjEGB5YGV8eAlrwDPGxrancWYaLbumR9YbK+rlmM6pZW87ipxZz\n" \
+  "R8srzJmwN0jP41ZL9c8PDHIyh8bwRLtTcm1D9SZImlJnt1ir/md2cXjbDaJWFBM5\n" \
+  "JDGFoqgCWjBH4d1QB7wCCZAA62RjYJsWvIjJEubSfZGL+T0yjWW06XyxV3bqxbYo\n" \
+  "Ob8VZRzI9neWagqNdwvYkQsEjgfbKbYK7p2CNTUQ\n" \
+  "-----END CERTIFICATE-----\n";
+
 // --- Internal variables
 int keysdec;
 int keyssdec;
@@ -170,7 +195,7 @@ void setup()
   M5.begin();
   M5.Lcd.drawBitmap(0, 0, 320, 240, (uint8_t *)BTCPaySplash_map);
   Wire.begin();
-
+  
   // Connect to wifi
   WiFi.begin(wifiSSID, wifiPASS);
   int i = 0;
@@ -296,36 +321,11 @@ void loop() {
 }
 
 // --- HELPERS
-String get_request_body(WiFiClientSecure &client)
-{
-  // skip headers
-  while (client.connected() || client.available()) {
-    if (client.available() && client.readStringUntil('\n') == "\r") break;
-  }
-
-  // find body – this is still brittle!
-  String reqBody = "";
-  while (client.connected() || client.available()) {
-    if (client.available()) {
-      String ln = client.readStringUntil('\n');
-      Serial.println("---: " + ln);
-      if (ln.indexOf("{") >= 0 || ln.indexOf("}") >= 0) {
-        reqBody += ln;
-        break;
-      } else if (ln == "\r") {
-        break;
-      }
-    }
-  }
-
-  reqBody.trim();
-
-  return reqBody;
-}
-
 String request_json(String action, String payload)
 {
   WiFiClientSecure client;
+  client.setCACert(root_ca);
+  
   if (!client.connect(server, httpsPort)) {
     Serial.println("ERR: Connection error");
     char err_buf[100];
@@ -338,7 +338,7 @@ String request_json(String action, String payload)
 
   Serial.println("REQ: " + action + " " + payload);
   
-  // Get and parse JSON body
+  // request
   client.print(action + " HTTP/1.1\r\n" +
                "Host: " + server + "\r\n" +
                "User-Agent: M5StackSatsBTCPAY/1.0\r\n" +
@@ -347,7 +347,28 @@ String request_json(String action, String payload)
                "Authorization: Basic " + encodedApiKey + "\r\n" +
                "Connection: close\r\n" + 
                "Content-Length: " + payload.length() + "\r\n\r\n" + payload + "\r\n");
-  String json = get_request_body(client);
+
+  // skip response headers
+  while (client.connected() || client.available()) {
+    if (client.available() && client.readStringUntil('\n') == "\r") break;
+  }
+
+  // get and parse JSON body – this is still brittle!
+  String json = "";
+  while (client.connected() || client.available()) {
+    if (client.available()) {
+      String ln = client.readStringUntil('\n');
+      Serial.println("---: " + ln);
+      if (ln.indexOf("{") >= 0 || ln.indexOf("}") >= 0) {
+        json += ln;
+        break;
+      } else if (ln == "\r") {
+        break;
+      }
+    }
+  }
+  json.trim();
+  
   client.stop();
   
   Serial.println("RES: " + json);
